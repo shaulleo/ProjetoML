@@ -46,3 +46,17 @@ def plot_histogram(df, column_name):
     
     # display the plot
     plt.show()
+
+
+#Separate birthday date into three different columns
+#-- observation vem em formato TimeStamp
+def birthday(observation):
+    date = str(observation).split(' ')[0]
+    date = date.split('-')
+    day = int(date[0])
+    month = int(date[1])
+    year = int(date[2])
+    return day, month, year
+
+
+#Descobrir signo zodíaco :P
