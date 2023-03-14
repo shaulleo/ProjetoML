@@ -53,9 +53,9 @@ def plot_histogram(df, column_name):
 def birthday(observation):
     date = str(observation).split(' ')[0]
     date = date.split('-')
-    day = int(date[0])
+    day = int(date[2])
     month = int(date[1])
-    year = int(date[2])
+    year = int(date[0])
     return day, month, year
 
 
