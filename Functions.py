@@ -1,6 +1,6 @@
 #Functions
 
-#Extract education level from customer name
+#Extract education level from customer name - Falta fazer o Encode
 def extract_education(observation):
     name_list = observation.split(' ')
     if len(name_list) > 2:
@@ -59,4 +59,13 @@ def birthday(observation):
     return day, month, year
 
 
-#Descobrir signo zodíaco :P
+#
+#Retirar local de morada
+def get_address(row):
+    geolocator = Nominatim(user_agent='my_app')
+    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address
+    full_address = full_address.split(',')
+    return full_address[-4]
+
+#Fazer função para convert varias cols de uma dataframe em int
+
