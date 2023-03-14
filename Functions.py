@@ -1,6 +1,6 @@
 #Functions
 
-#Extract education level from customer name
+#Extract education level from customer name - Falta fazer o Encode
 def extract_education(observation):
     name_list = observation.split(' ')
     if len(name_list) > 2:
@@ -46,3 +46,26 @@ def plot_histogram(df, column_name):
     
     # display the plot
     plt.show()
+
+
+#Separate birthday date into three different columns
+#-- observation vem em formato TimeStamp
+def birthday(observation):
+    date = str(observation).split(' ')[0]
+    date = date.split('-')
+    day = int(date[2])
+    month = int(date[1])
+    year = int(date[0])
+    return day, month, year
+
+
+#
+#Retirar local de morada
+def get_address(row):
+    geolocator = Nominatim(user_agent='my_app')
+    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address
+    full_address = full_address.split(',')
+    return full_address[-4]
+
+#Fazer função para convert varias cols de uma dataframe em int
+
