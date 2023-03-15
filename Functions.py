@@ -8,9 +8,6 @@ import matplotlib.pyplot as plt
 import reverse_geocoder as rg
 from geopy.geocoders import Nominatim
 
-#Para fazer mapas
-import folium
-from folium.plugins import HeatMap, MarkerCluster 
 
 
 #Extract education level from customer name - Encoding feito
@@ -106,6 +103,7 @@ def binary_encoding(df, col_name, condition):
 #Fazer função para convert varias cols de uma dataframe em int
 def integer_convert(df, cols):
     # Converte as colunas especificadas em cols de float para int
-    df[col] = df[col].astype('int64')
+    df[cols] = df[cols].astype('int64')
     return df
+
 
