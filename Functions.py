@@ -1,17 +1,30 @@
 #Functions
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-#Extract education level from customer name - Falta fazer o Encode
+#Para encontrar a morada de cada
+import reverse_geocoder as rg
+from geopy.geocoders import Nominatim
+
+#Para fazer mapas
+import folium
+from folium.plugins import HeatMap, MarkerCluster 
+
+
+#Extract education level from customer name - Encoding feito
 def extract_education(observation):
     name_list = observation.split(' ')
     if len(name_list) > 2:
         if name_list[0] == 'Msc.':
-            education = 'Masters Degree'
+            education = 2
         elif name_list[0] == 'Bsc.':
-            education = 'Bachelor Degree'
+            education = 1
         else:
-            education = 'Doctoral Degree'
+            education = 3
     else:
-        education = 'Basic'
+        education = 0
     return education
 
 
@@ -49,17 +62,16 @@ def plot_histogram(df, column_name):
 
 
 #Separate birthday date into three different columns
-#-- observation vem em formato TimeStamp
-def birthday(observation):
-    date = str(observation).split(' ')[0]
-    date = date.split('-')
-    day = int(date[2])
-    month = int(date[1])
-    year = int(date[0])
-    return day, month, year
+def process_birthdate(df):
+    #birthday
+    df['birthday'] = df['customer_birthdate'].dt.day
+    #birthmonth
+    df['birthmonth'] = df['customer_birthdate'].dt.month
+    #birthyear
+    df['birthyear'] = df['customer_birthdate'].dt.year
+    return df
 
 
-#
 #Retirar local de morada
 def get_address(row):
     geolocator = Nominatim(user_agent='my_app')
@@ -67,5 +79,27 @@ def get_address(row):
     full_address = full_address.split(',')
     return full_address[-4]
 
+#A partir da freguesia extrai no cluster o valor medio de lat/long e faz o encoding respectivamente
+def encode_address(dataframe, latitude, longitude, address):
+
+
+
+# função que faz o encoding não binário
+def categorical_encoding(df, col_name, replace_dict):
+    new_col_name = col_name + '_encoded'
+    df[new_col_name] = df[col_name].map(replace_dict)
+    # df = df.drop(col_name, axis=1) # faz o drop da coluna inicial
+    return df
+
+# função que faz o encoding binário
+def binary_encoding(df, col_name, replace_dict):
+    df[col_name] = df[col_name].replace(replace_dict)
+    return df
+
 #Fazer função para convert varias cols de uma dataframe em int
+def integer_convert(df, cols):
+    # Converte as colunas especificadas em cols de float para int
+    for col in cols:
+        df[col] = df[col].astype(int)
+    return df
 
