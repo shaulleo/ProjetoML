@@ -80,7 +80,7 @@ def get_address(row):
     return full_address[-4]
 
 #A partir da freguesia extrai no cluster o valor medio de lat/long e faz o encoding respectivamente
-def encode_address(dataframe, latitude, longitude, address):
+#def encode_address(dataframe, latitude, longitude, address):
 
 
 
