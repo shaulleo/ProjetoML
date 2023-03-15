@@ -62,13 +62,14 @@ def plot_histogram(df, column_name):
 
 
 #Separate birthday date into three different columns
-def process_birthdate(df):
+def process_birthdate(df, birthdate):
+    df[birthdate] = pd.to_datetime(df[birthdate])
     #birthday
-    df['birthday'] = df['customer_birthdate'].dt.day
+    df['birthday'] = df[birthdate].dt.day
     #birthmonth
-    df['birthmonth'] = df['customer_birthdate'].dt.month
+    df['birthmonth'] = df[birthdate].dt.month
     #birthyear
-    df['birthyear'] = df['customer_birthdate'].dt.year
+    df['birthyear'] = df[birthdate].dt.year
     return df
 
 
@@ -79,8 +80,12 @@ def get_address(row):
     full_address = full_address.split(',')
     return full_address[-4]
 
+
 #A partir da freguesia extrai no cluster o valor medio de lat/long e faz o encoding respectivamente
-#def encode_address(dataframe, latitude, longitude, address):
+def encode_address(dataframe, latitude, longitude, address):
+    dataframe['latitude_encoded'] = dataframe.groupby(address)[latitude].mean().reset_index()[latitude]
+    dataframe['longitude_encoded'] = dataframe.groupby(address)[longitude].mean().reset_index()[longitude]
+    return dataframe
 
 
 
@@ -92,14 +97,15 @@ def categorical_encoding(df, col_name, replace_dict):
     return df
 
 # função que faz o encoding binário
-def binary_encoding(df, col_name, replace_dict):
-    df[col_name] = df[col_name].replace(replace_dict)
+#Se a condição for true, a col_name tem valor 0, caso contrário tem 1
+def binary_encoding(df, col_name, condition):
+    #new_col_name = col_name + '_encoded'
+    df[col_name] = np.where(condition, 0, 1)
     return df
 
 #Fazer função para convert varias cols de uma dataframe em int
 def integer_convert(df, cols):
     # Converte as colunas especificadas em cols de float para int
-    for col in cols:
-        df[col] = df[col].astype(int)
+    df[col] = df[col].astype('int64')
     return df
 
