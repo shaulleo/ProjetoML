@@ -77,17 +77,30 @@ def get_address_1(row):
     full_address = full_address.split(',')
     return full_address[-4]
 
+def get_address_2(row): 
+    geolocator = Nominatim(user_agent='my_app') 
+    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
+    #full_address = full_address.split(',') 
+    return full_address
+
 def get_address(row): 
     geolocator = Nominatim(user_agent='my_app') 
     full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
-    full_address = full_address.split(',') 
-    return full_address[-4]
+    return full_address
 
+def clean_address(row):
+    full_address = row.split(',')
+    if len(full_address) > 4:
+        return full_address[-4]
+    else:
+        return full_address[-3]
 
 #A partir da freguesia extrai no cluster o valor medio de lat/long e faz o encoding respectivamente
 def encode_address(dataframe, latitude, longitude, address):
-    dataframe['latitude_encoded'] = dataframe.groupby(address)[latitude].mean().reset_index()[latitude]
-    dataframe['longitude_encoded'] = dataframe.groupby(address)[longitude].mean().reset_index()[longitude]
+    lat_map = dataframe.groupby(address)[latitude].mean().to_dict()
+    long_map = dataframe.groupby(address)[longitude].mean().to_dict()
+    dataframe['latitude_encoded'] = dataframe[address].map(lat_map)
+    dataframe['longitude_encoded'] = dataframe[address].map(long_map)
     return dataframe
 
 
