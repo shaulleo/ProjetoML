@@ -71,10 +71,16 @@ def process_birthdate(df, birthdate):
 
 
 #Retirar local de morada
-def get_address(row):
+def get_address_1(row):
     geolocator = Nominatim(user_agent='my_app')
     full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address
     full_address = full_address.split(',')
+    return full_address[-4]
+
+def get_address(row): 
+    geolocator = Nominatim(user_agent='my_app') 
+    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
+    full_address = full_address.split(',') 
     return full_address[-4]
 
 
