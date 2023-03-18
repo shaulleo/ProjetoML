@@ -91,9 +91,12 @@ def get_address(row):
 def clean_address(row):
     full_address = row.split(',')
     if len(full_address) > 4:
-        return full_address[-4]
+        address = full_address[-4]
     else:
-        return full_address[-3]
+        address = full_address[-3]
+    if address[0] == " ":
+        address = address[1:]
+    return address
 
 #A partir da freguesia extrai no cluster o valor medio de lat/long e faz o encoding respectivamente
 def encode_address(dataframe, latitude, longitude, address):
