@@ -146,3 +146,5 @@ def integer_convert(df, cols):
 def bar_charts(df, var):
     sns.countplot(data=df, x=var)
     plt.show()
+
+    
