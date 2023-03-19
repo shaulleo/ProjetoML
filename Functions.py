@@ -98,6 +98,19 @@ def clean_address(row):
         address = address[1:]
     return address
 
+def clean_address_bruno(row):
+    full_address = row.split(',')
+    if len(full_address) >= 4:
+        if full_address[-3] == ' Lisboa' or full_address[-3] == 'Lisboa':
+            address = full_address[-4]
+        else:
+            address = full_address[-3]
+    else:
+        address = full_address[-3]
+    if address[0] == ' ':
+        address = address[1:]
+    return address
+
 #A partir da freguesia extrai no cluster o valor medio de lat/long e faz o encoding respectivamente
 def encode_address(dataframe, latitude, longitude, address):
     lat_map = dataframe.groupby(address)[latitude].mean().to_dict()
