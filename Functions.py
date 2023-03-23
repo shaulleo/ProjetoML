@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import reverse_geocoder as rg
 from geopy.geocoders import Nominatim
 
+from datetime import date 
+
 
 # ---------- PRE PROCESSAMENTO
 
@@ -46,7 +48,8 @@ def process_birthdate(df, birthdate):
     #birthmonth
     df['birthmonth'] = df[birthdate].dt.month
     #birthyear
-    df['age'] = 2022 - df[birthdate].dt.year
+    year_ = date.today().year 
+    df['age'] = int(year_) - df[birthdate].dt.year
     return df
 
 
