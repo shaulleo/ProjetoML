@@ -46,7 +46,7 @@ def process_birthdate(df, birthdate):
     #birthmonth
     df['birthmonth'] = df[birthdate].dt.month
     #birthyear
-    df['birthyear'] = df[birthdate].dt.year
+    df['age'] = 2022 - df[birthdate].dt.year
     return df
 
 
