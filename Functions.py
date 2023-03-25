@@ -54,18 +54,6 @@ def process_birthdate(df, birthdate):
 
 
 #Retirar local de morada
-def get_address_1(row):
-    geolocator = Nominatim(user_agent='my_app')
-    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address
-    full_address = full_address.split(',')
-    return full_address[-4]
-
-def get_address_2(row): 
-    geolocator = Nominatim(user_agent='my_app') 
-    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
-    #full_address = full_address.split(',') 
-    return full_address
-
 def get_address(row): 
     geolocator = Nominatim(user_agent='my_app') 
     full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
@@ -74,18 +62,18 @@ def get_address(row):
 
 #Limpar o endereço num só 
 #Função Shaul
-def clean_address(row):
-    full_address = row.split(',')
-    if len(full_address) > 4:
-        address = full_address[-4]
-    else:
-        address = full_address[-3]
-    if address[0] == " ":
-        address = address[1:]
-    return address
+# def clean_address(row):
+#     full_address = row.split(',')
+#     if len(full_address) > 4:
+#         address = full_address[-4]
+#     else:
+#         address = full_address[-3]
+#     if address[0] == " ":
+#         address = address[1:]
+#     return address
 
 #Função Bruno
-def clean_address_bruno(row):
+def clean_address(row):
     full_address = row.split(',')
     if len(full_address) >= 4:
         if full_address[-3] == ' Lisboa' or full_address[-3] == 'Lisboa':
