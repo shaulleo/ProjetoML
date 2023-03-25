@@ -54,18 +54,6 @@ def process_birthdate(df, birthdate):
 
 
 #Retirar local de morada
-def get_address_1(row):
-    geolocator = Nominatim(user_agent='my_app')
-    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address
-    full_address = full_address.split(',')
-    return full_address[-4]
-
-def get_address_2(row): 
-    geolocator = Nominatim(user_agent='my_app') 
-    full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
-    #full_address = full_address.split(',') 
-    return full_address
-
 def get_address(row): 
     geolocator = Nominatim(user_agent='my_app') 
     full_address = geolocator.reverse(f"{row['latitude']}, {row['longitude']}").address 
@@ -74,18 +62,18 @@ def get_address(row):
 
 #Limpar o endereço num só 
 #Função Shaul
-def clean_address(row):
-    full_address = row.split(',')
-    if len(full_address) > 4:
-        address = full_address[-4]
-    else:
-        address = full_address[-3]
-    if address[0] == " ":
-        address = address[1:]
-    return address
+# def clean_address(row):
+#     full_address = row.split(',')
+#     if len(full_address) > 4:
+#         address = full_address[-4]
+#     else:
+#         address = full_address[-3]
+#     if address[0] == " ":
+#         address = address[1:]
+#     return address
 
 #Função Bruno
-def clean_address_bruno(row):
+def clean_address(row):
     full_address = row.split(',')
     if len(full_address) >= 4:
         if full_address[-3] == ' Lisboa' or full_address[-3] == 'Lisboa':
@@ -165,3 +153,15 @@ def seaborn_histograms(df, column_name):
 def bar_charts(df, var):
     sns.countplot(data=df, x=var)
     plt.show()
+
+
+# ------- EXPLORAÇÃO
+
+#Extrai correlações
+def get_high_correlations(corr_matrix, threshold):
+    corr_series = corr_matrix.stack()  # convert the correlation matrix into a series
+    high_corr = corr_series[((corr_series > threshold) | (corr_series < -threshold)) & (corr_series < 1.0)]  # select pairs with correlation value higher than threshold
+    high_corr = high_corr.reset_index()  # convert the series back to a dataframe
+    high_corr.columns = ['Variable 1', 'Variable 2', 'Correlation']  # rename the columns
+    high_corr = high_corr.sort_values('Correlation', ascending=False)  # sort by correlation value
+    return high_corr
