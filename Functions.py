@@ -165,3 +165,15 @@ def seaborn_histograms(df, column_name):
 def bar_charts(df, var):
     sns.countplot(data=df, x=var)
     plt.show()
+
+
+# ------- EXPLORAÇÃO
+
+#Extrai correlações
+def get_high_correlations(corr_matrix, threshold):
+    corr_series = corr_matrix.stack()  # convert the correlation matrix into a series
+    high_corr = corr_series[((corr_series > threshold) | (corr_series < -threshold)) & (corr_series < 1.0)]  # select pairs with correlation value higher than threshold
+    high_corr = high_corr.reset_index()  # convert the series back to a dataframe
+    high_corr.columns = ['Variable 1', 'Variable 2', 'Correlation']  # rename the columns
+    high_corr = high_corr.sort_values('Correlation', ascending=False)  # sort by correlation value
+    return high_corr
