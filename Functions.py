@@ -155,6 +155,40 @@ def bar_charts(df, var):
     plt.show()
 
 
+#Função Madalena para os histogramas
+def plot_histograms(df, cols):
+    for col in cols:
+        data = df[col]
+        if data.dtype == 'int64':
+            bins = data.nunique()
+        elif data.dtype == 'float64':
+            q75, q25 = np.percentile(data, [75 ,25])
+            iqr = q75 - q25
+            bin_width = 2 * iqr * len(data)**(-1/3)
+            bins = int((data.max() - data.min()) / bin_width)
+        else:
+            print(f"Skipping column '{col}' - not a numeric datatype")
+            continue
+        
+        fig, ax = plt.subplots(figsize=(12, 4))
+        sns.histplot(x=data, bins=bins, color='lightblue', ax=ax)
+        ax.set_title(f'{col} histogram', fontsize=14)
+        ax.set_xlabel(col, fontsize=12)
+        ax.set_ylabel('Frequency', fontsize=12)
+        plt.show()
+
+#Função da Madalena para os bar charts
+def plot_bar_charts(df, columns):
+    for col in columns:
+        fig, ax = plt.subplots(figsize=(12, 3))
+        sns.countplot(x=col, data=df, ax=ax, color='lightblue', linewidth=1, edgecolor=".2")
+        ax.set_title(f'{col}', fontsize=12)
+        ax.set_xlabel(col, fontsize=10)
+        ax.tick_params(axis='x', labelsize=8)
+        ax.set_ylabel('Count', fontsize=10)
+        ax.tick_params(axis='y', labelsize=8)
+        plt.show()
+
 # ------- EXPLORAÇÃO
 
 #Extrai correlações
