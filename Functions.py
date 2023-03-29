@@ -189,6 +189,8 @@ def plot_bar_charts(df, columns):
         ax.tick_params(axis='y', labelsize=8)
         plt.show()
 
+
+
 # ------- EXPLORAÇÃO
 
 #Extrai correlações
