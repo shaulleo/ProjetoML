@@ -1,15 +1,23 @@
-#Functions
+#Basic Packages
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from datetime import date 
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.cluster import KMeans, AgglomerativeClustering
+import squarify
 
-#Para encontrar a morada de cada
+#To find addresses
 import reverse_geocoder as rg
 from geopy.geocoders import Nominatim
 
-from datetime import date 
+#Plot Maps
+import folium
+from folium.plugins import HeatMap, MarkerCluster 
 
+import warnings
+warnings.filterwarnings("ignore")
 
 # ---------- PRE PROCESSAMENTO
 
@@ -190,6 +198,17 @@ def plot_bar_charts(df, columns):
         plt.show()
 
 
+def plot_lisbon_heatmap(df, lat, long, variable):
+    map_lisbon = folium.Map(location=[38.736946, -9.142685], zoom_start=12)
+
+    # Add a heatmap layer to the map
+    HeatMap(data= df[[lat, long, variable]], 
+            radius=15, max_zoom=13, 
+            gradient={0.2: 'blue', 0.4: 'purple', 0.6: 'pink', 0.8: 'orange', 1.0: 'red'}).add_to(map_lisbon)
+
+    # Display the map
+    return map_lisbon
+    
 
 # ------- EXPLORAÇÃO
 
@@ -201,3 +220,17 @@ def get_high_correlations(corr_matrix, threshold):
     high_corr.columns = ['Variable 1', 'Variable 2', 'Correlation']  # rename the columns
     high_corr = high_corr.sort_values('Correlation', ascending=False)  # sort by correlation value
     return high_corr
+
+# -------- K-MEANS
+
+def plot_inertia(data, k, times):
+    fig, ax = plt.subplots()
+    random_states = [np.random.randint(0, 1000) for i in range(times)]
+    for i in random_states:
+        inertia_kmeans = []
+        for j in range(2, k):
+            kmeans = KMeans(n_clusters=j, random_state=i).fit(data)
+            inertia_kmeans.append(kmeans.inertia_)
+        ax.plot(range(2, k), inertia_kmeans, 'x-', label=f'i={i}')
+    ax.legend()
+    plt.show()
