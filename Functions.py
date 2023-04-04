@@ -57,7 +57,6 @@ def extract_education(row: str) -> int:
 
 
 
-#REVER ESTA POR CAUSA DOS SUPERMERCADOS
 def clean_names(row: str) -> str:
     """
     Cleans a customer name by removing education level titles and 
@@ -165,9 +164,24 @@ def get_address(row: pd.Series) -> str:
 
 #POSSIVEL VERSÃO OTIMIZADA TEMOS DE TESTAR
 def clean_address(row: str) -> str:
+    """
+     Extract the region information from the full address.
 
+     Parameters:
+     row (str): A string representing the full address.
+
+     Returns:
+     str: A string representing the region of the address.
+
+    """
+    #Split the full address into a list based on comma separators.
     full_address = row.split(',')
+    #Verify if the list length is lower than 4. If so, assign the address as the 
+    #third last value in the list, otherwise return the fourth last value in the list,
+    #if Lisbon is contained in the region name.
     address = full_address[-3] if len(full_address) < 4 else full_address[-4] if 'Lisboa' in full_address[-3] else full_address[-3]
+
+    #Cleanse the region name, in the case of it beginning with a whitespace.
     return address.strip()
 
 
@@ -454,4 +468,26 @@ def plot_inertia(df: pd.DataFrame, k: int, times: int) -> None:
     
     ax.legend()
     plt.show()
+
+
+def compare_clusters(df: pd.DataFrame, cluster_col: str) -> pd.DataFrame:
+    """
+    Creates a DataFrame with the mean value of each column for different 
+    clusters and for all observations.
+
+    Parameters:
+    df (pd.DataFrame): The pandas DataFrame containing the data with the 
+    designated clusters.
+    cluster_col (str): The name of the column containing the cluster information.
+
+    Returns:
+    pd.DataFrame: A pandas DataFrame containing the mean values of each column, 
+    grouped by the cluster column and the general mean for each variable.
+
+    """
+    general_mean = pd.DataFrame(df.mean().T).rename(columns={0:'general_mean'})
+    clusters_mean = pd.DataFrame(df.groupby(cluster_col).mean().T)
+    
+    return clusters_mean.join(general_mean)
+
 
