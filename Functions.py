@@ -433,6 +433,30 @@ def get_high_correlations(corr_matrix: pd.DataFrame, threshold: float) -> pd.Dat
     return high_corr
 
 
+def group_by_region(df: pd.DataFrame, region_col: str, cols: list[str]):
+    """
+    Find the mean values of given set of columns and the count of observations by region.
+
+    Parameters:
+    df (pd.DataFrame): Input DataFrame to group by region.
+    region_col (str): A string representing the name of the column to group by (the region column).
+    cols (list[str]): List of column names to calculate the mean values for.
+
+    Returns:
+    pd.DataFrame: DataFrame containing the mean value of the specified columns
+    per region and the count of observations per region.
+    """
+    nr_region = df.groupby(region_col)[cols[0]].count().reset_index()
+    nr_region.rename(columns={cols[0]: 'count'}, inplace=True)
+
+    # Group the data by region and calculate the average total lifetime and others spend per region
+    region_data = df.groupby(region_col)[cols].mean()
+
+    region_data = region_data.merge(nr_region, on=region_col)
+    
+    return region_data
+
+
 
 # -------- K-MEANS
 
