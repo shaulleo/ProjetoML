@@ -266,8 +266,8 @@ def integer_convert(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
 
 #NOTA!: Perguntar a madalena sobre o primeiro if
 
-
-def plot_histograms(df: pd.DataFrame, cols: list[str]) -> None:
+#AJUSTAR DOCSTRINGS C BASE NA HUE
+def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
     """
     Plots histograms using seaborn for specified columns of a pandas DataFrame.
 
@@ -281,19 +281,19 @@ def plot_histograms(df: pd.DataFrame, cols: list[str]) -> None:
     """
     #Loop over each column.
     for col in cols:
-        data = df[col]
+        data__ = df[col]
             #Determine the optimal number of bins based on the data type of the column.
             #If the data type is an integer, assign the number of bins as the number of 
             # unique values within the data.
-        if data.dtype == 'int64':
+        if data__.dtype == 'int64':
             bins = data.nunique()
             #If the data type is float, compute the optimum number of bins using 
             # the Freedman–Diaconis rule.
-        elif data.dtype == 'float64':
+        elif data__.dtype == 'float64':
             q75, q25 = np.percentile(data, [75 ,25])
             iqr = q75 - q25
-            bin_width = 2 * iqr * len(data)**(-1/3)
-            bins = int((data.max() - data.min()) / bin_width)
+            bin_width = 2 * iqr * len(data__)**(-1/3)
+            bins = int((data__.max() - data__.min()) / bin_width)
             #Otherwise, do not calculate the number of bins.
         else:
             print(f"Skipping column '{col}' - not a numeric datatype")
@@ -301,7 +301,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str]) -> None:
         
         #Plot the histogram for the column.
         fig, ax = plt.subplots(figsize=(12, 4))
-        sns.histplot(x=data, bins=bins, color='lightblue', ax=ax)
+        sns.histplot(data= df, x=col, bins=bins, color='lightblue', ax=ax, hue=hue_var)
         #Set title and labels.
         ax.set_title(f'{col} histogram', fontsize=14)
         ax.set_xlabel(col, fontsize=12)
