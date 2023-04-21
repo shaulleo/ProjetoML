@@ -286,11 +286,11 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
             #If the data type is an integer, assign the number of bins as the number of 
             # unique values within the data.
         if data__.dtype == 'int64':
-            bins = data.nunique()
+            bins = data__.nunique()
             #If the data type is float, compute the optimum number of bins using 
             # the Freedman–Diaconis rule.
         elif data__.dtype == 'float64':
-            q75, q25 = np.percentile(data, [75 ,25])
+            q75, q25 = np.percentile(data__, [75 ,25])
             iqr = q75 - q25
             bin_width = 2 * iqr * len(data__)**(-1/3)
             bins = int((data__.max() - data__.min()) / bin_width)
