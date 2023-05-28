@@ -5,6 +5,7 @@ from datetime import date
 
 #Clustering
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples, silhouette_score
 
 #To find addresses
 from geopy.geocoders import Nominatim
@@ -483,7 +484,7 @@ def compare_clusters(df: pd.DataFrame, cluster_col: str) -> pd.DataFrame:
     clusters and for all observations.
 
     Parameters:
-    df (pd.DataFrame): The pandas DataFrame containing the data with the 
+    df (pd.DataFrame): A DataFrame containing the data with the 
     designated clusters.
     cluster_col (str): The name of the column containing the cluster information.
 
@@ -500,20 +501,128 @@ def compare_clusters(df: pd.DataFrame, cluster_col: str) -> pd.DataFrame:
     return clusters_mean.join(general_mean)
 
 
-#Association Rules
 
-def preprocess_basket(df, cluster):
+def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
+    """
+    Compute and visualize the Silhouette method for evaluating the quality of a clustering solution.
+
+    Parameters:
+    - df (pd.DataFrame): A DataFrame containing the data with the 
+    designated clusters.
+    - cluster_col (str): The name of the column containing the cluster information.
+
+    Returns:
+    - None: Displays the Silhouette plot and prints the Silhouette score.
+    """
+    #Access the cluster labels 
+    cluster_labels = df[cluster_col]
+
+    #Specify the number of clusters
+    n_clusters = len(cluster_labels.unique())
+    #n_clusters = 6
+
+    #Calculate silhouette score for the clustering solution
+    silhouette_avg = silhouette_score(df, cluster_labels)
+
+    #Compute silhouette scores for each sample
+    sample_silhouette_values = silhouette_samples(df, cluster_labels)
+
+    #Plot silhouette visualization
+    fig, ax = plt.subplots()
+    fig.set_size_inches(7, 4)
+
+    y_lower = 10
+    for i in range(n_clusters):
+        #Aggregate silhouette scores for samples in the current cluster
+        ith_cluster_silhouette_values = sample_silhouette_values[cluster_labels == i]
+
+        #Sort the silhouette scores in descending order
+        ith_cluster_silhouette_values.sort()
+
+        size_cluster_i = ith_cluster_silhouette_values.shape[0]
+        y_upper = y_lower + size_cluster_i
+
+        #Color the clusters
+        color = plt.cm.get_cmap("Spectral")(float(i) / n_clusters)
+        ax.fill_betweenx(np.arange(y_lower, y_upper), 0, ith_cluster_silhouette_values,
+                        facecolor=color, edgecolor=color, alpha=0.7)
+
+        #Label each cluster silhouette plot with the cluster number
+        ax.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+
+        #Compute the new y_lower for the next plot
+        y_lower = y_upper + 10
+
+    ax.set_xlabel("Silhouette coefficient values")
+    ax.set_ylabel("Cluster label")
+
+    #The vertical line for average silhouette score
+    ax.axvline(x=silhouette_avg, color="red", linestyle="--")
+
+    ax.set_yticks([])
+    ax.set_xticks([-1, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1])
+    ax.set_title("Silhouette plot for {} clusters".format(n_clusters))
+
+    plt.show()
+
+    #Print the silhouette score
+    print("Silhouette score for {} clusters: {:.4f}".format(n_clusters, silhouette_avg))
+
+
+
+#Association Rules -> só esta a funcionar para a o cluster_kmeansZ
+
+def preprocess_basket(df: pd.DataFrame, cluster: int) -> pd.DataFrame:
+    """
+    Preprocess the basket data for a specific cluster.
+
+    Parameters:
+    - df (pd.DataFrame): A DataFrame containing the transactional data with the 
+    respetive customer's clusters.
+    - cluster (int): The cluster number.
+
+    Returns:
+    - transaction_items (pd.DataFrame): A dataframe with the items for each transaction
+    of the given cluster.
+    """
+
+    #Filter basket data for the specified cluster
     filtered_basket = df[df['cluster_kmeansZ'] == cluster]
+
+    #Drop unnecessary columns
     filtered_basket.drop(['customer_id','cluster_kmeansZ'], inplace=True, axis=1)
+
+    #Convert the 'list_of_goods' column of the basket values to lists
     filtered_basket = [ast.literal_eval(element) for element in list(filtered_basket['list_of_goods'])]
     te = TransactionEncoder()
     te_fit = te.fit(filtered_basket).transform(filtered_basket)
+
+    #Perform one-hot encoding
     transaction_items = pd.DataFrame(te_fit, columns= te.columns_)
+    
     return transaction_items
 
-def build_rules(df, min_support, metric, min_threshold):
+
+def build_rules(df: pd.DataFrame, min_support: float, metric: str, min_threshold: float) -> pd.DataFrame:
+    """
+    Build association rules from frequent itemsets.
+
+    Parameters:
+    - df (pd.DataFrame): A one-hot encoded dataframe with the items for each transaction.
+    - min_support (float): The minimum support threshold for finding frequent item sets.
+    - metric (str): The metric used to evaluate the association rules.
+    - min_threshold (float): The minimum threshold of the metric that generates the 
+    association rules.
+
+    Returns:
+    - rules (pd.DataFrame): DataFrame containing the generated association rules.
+    """
+    #Find frequent item groups
     frequent_itemsets = apriori(df, min_support=min_support, use_colnames=True)
+
+    #Generate association rules based on a given metric and threshold
     rules = association_rules(frequent_itemsets, metric=metric, min_threshold=min_threshold)
+    
     return rules
 
 
