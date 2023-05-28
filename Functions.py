@@ -1,21 +1,29 @@
 #Basic Packages
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from datetime import date 
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.cluster import KMeans, AgglomerativeClustering
-import squarify
+
+#Clustering
+from sklearn.cluster import KMeans
 
 #To find addresses
-import reverse_geocoder as rg
 from geopy.geocoders import Nominatim
 
-#Plot Maps
+#Visualization
+import squarify
+import seaborn as sns
+import matplotlib.pyplot as plt
 import folium
 from folium.plugins import HeatMap
+
+#Association Rules
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+from mlxtend.preprocessing import TransactionEncoder
+
+
 import warnings
+import ast
 warnings.filterwarnings("ignore")
 
 #Functions
@@ -129,40 +137,6 @@ def get_address(row: pd.Series) -> str:
 
 
 
-# def clean_address(row: str) -> str:
-#     """
-#     Extract the region information from the full address.
-
-#     Parameters:
-#     row (str): A string representing the full address.
-
-#     Returns:
-#     str: A string representing the region of the address.
-
-#     """
-#         #Split the full address into a list based on comma separators.
-#     full_address = row.split(',')
-#         #If the list's length is equal or highter than 4.
-#     if len(full_address) >= 4:
-#         #Verify if the third last value in the list is equal to Lisbon.
-#         #If so, assign the region as the fourth last value in the list.
-#         if full_address[-3] == ' Lisboa' or full_address[-3] == 'Lisboa':
-#             address = full_address[-4]
-#         #Otherwise, assign the third last value in the list as region.
-#         else:
-#             address = full_address[-3]
-#         #ACHO QUE PODEMOS APAGAR ESTE ELSE
-#     else:
-#         address = full_address[-3]
-#     #Cleanse the region name, in the case of it beginning with a whitespace.
-#     if address[0] == ' ':
-#         address = address[1:]
-    
-#     return address
-
-
-
-#POSSIVEL VERSÃO OTIMIZADA TEMOS DE TESTAR
 def clean_address(row: str) -> str:
     """
      Extract the region information from the full address.
@@ -264,7 +238,6 @@ def integer_convert(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
 #------- VISUALIZATION
 
 
-#NOTA!: Perguntar a madalena sobre o primeiro if
 
 #AJUSTAR DOCSTRINGS C BASE NA HUE
 def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
@@ -274,6 +247,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
     Parameters:
     df (pd.DataFrame): The pandas DataFrame with the data to plot.
     cols (list[str]): A list of strings representing the names of the columns to plot.
+
 
     Returns:
     None.
@@ -399,7 +373,16 @@ def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> foli
 
     return map_lisbon
 
-    
+
+def regional_treemap(df):
+    sns.set_style(style="whitegrid") 
+    sizes= df["count"].values 
+    label=df["region"]
+    squarify.plot(sizes=sizes, label=label, alpha=0.6).set(title='Observations by Region')
+    plt.axis('off')
+    sns.set(rc={'figure.figsize':(17,17)})
+    plt.show()
+
 
 # ------- EXPLORAÇÃO
 
@@ -509,9 +492,29 @@ def compare_clusters(df: pd.DataFrame, cluster_col: str) -> pd.DataFrame:
     grouped by the cluster column and the general mean for each variable.
 
     """
+    #Compute the mean of the variable without segmentation
     general_mean = pd.DataFrame(df.mean().T).rename(columns={0:'general_mean'})
+    #Find mean values of the variable per cluster
     clusters_mean = pd.DataFrame(df.groupby(cluster_col).mean().T)
     
     return clusters_mean.join(general_mean)
+
+
+#Association Rules
+
+def preprocess_basket(df, cluster):
+    filtered_basket = df[df['cluster_kmeansZ'] == cluster]
+    filtered_basket.drop(['customer_id','cluster_kmeansZ'], inplace=True, axis=1)
+    filtered_basket = [ast.literal_eval(element) for element in list(filtered_basket['list_of_goods'])]
+    te = TransactionEncoder()
+    te_fit = te.fit(filtered_basket).transform(filtered_basket)
+    transaction_items = pd.DataFrame(te_fit, columns= te.columns_)
+    return transaction_items
+
+def build_rules(df, min_support, metric, min_threshold):
+    frequent_itemsets = apriori(df, min_support=min_support, use_colnames=True)
+    rules = association_rules(frequent_itemsets, metric=metric, min_threshold=min_threshold)
+    return rules
+
 
 
