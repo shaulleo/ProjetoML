@@ -17,6 +17,10 @@ import matplotlib.pyplot as plt
 import folium
 from folium.plugins import HeatMap
 
+# Umap library
+import umap
+
+
 #Association Rules
 from mlxtend.frequent_patterns import apriori
 from mlxtend.frequent_patterns import association_rules
@@ -569,6 +573,15 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
     print("Silhouette score for {} clusters: {:.4f}".format(n_clusters, silhouette_avg))
 
 
+def umap_plot(df: pd.DataFrame, cluster_col: str) -> None: 
+    reducer = umap.UMAP(random_state=42)
+    labels = df[cluster_col].values
+    embedding = reducer.fit_transform(df)
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='viridis')
+    plt.gca().set_aspect('equal', 'datalim')
+    plt.colorbar(boundaries=np.arange(7)-0.5).set_ticks(np.arange(6))
+    plt.show()
+
 
 #Association Rules -> só esta a funcionar para a o cluster_kmeansZ
 
@@ -587,10 +600,10 @@ def preprocess_basket(df: pd.DataFrame, cluster: int) -> pd.DataFrame:
     """
 
     #Filter basket data for the specified cluster
-    filtered_basket = df[df['cluster_kmeansZ'] == cluster]
+    filtered_basket = df[df['segment'] == cluster]
 
     #Drop unnecessary columns
-    filtered_basket.drop(['customer_id','cluster_kmeansZ'], inplace=True, axis=1)
+    filtered_basket.drop(['customer_id','segment'], inplace=True, axis=1)
 
     #Convert the 'list_of_goods' column of the basket values to lists
     filtered_basket = [ast.literal_eval(element) for element in list(filtered_basket['list_of_goods'])]
