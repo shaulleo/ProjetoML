@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from datetime import date 
+from typing import *
 
 #Clustering
 from sklearn.cluster import KMeans
@@ -243,8 +244,6 @@ def integer_convert(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
 #------- VISUALIZATION
 
 
-
-#AJUSTAR DOCSTRINGS C BASE NA HUE
 def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
     """
     Plots histograms using seaborn for specified columns of a pandas DataFrame.
@@ -252,6 +251,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
     Parameters:
     df (pd.DataFrame): The pandas DataFrame with the data to plot.
     cols (list[str]): A list of strings representing the names of the columns to plot.
+    hue_var (str): The column name representing the variable to color the plot.
 
 
     Returns:
@@ -353,6 +353,103 @@ def regional_treemap(df):
     plt.axis('off')
     sns.set(rc={'figure.figsize':(17,17)})
     plt.show()
+
+def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[int, bool] = 5000) -> None:
+    """
+    Create a pairplot for the specified columns of a DataFrame, with optional sampling.
+
+    Parameters:
+    df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    cols (list[str]): A list of strings representing the names of the columns to plot.
+    hue_var (str): The column name representing the variable to color the plot.
+    sampling (Union[int, bool], optional): The number of samples to include in the pairplot.
+            If False, no sampling is performed. Defaults to 5000.
+
+    Returns:
+        None
+    """
+    colors = ['#F29687','#5D64AC','#EFD56C','#B5699C','#569F6E', '#5D0000']
+    if not sampling:
+        sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors)
+        plt.show()
+    else:
+        sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors)
+        plt.show()
+
+
+def boxplot_by(individuals: pd.DataFrame, cols: List[str], by_col: Union[str, None] = None) -> None:
+    """
+    Create boxplots of continuous variables grouped by a discrete variable.
+
+    Parameters:
+    df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    cols (list[str]): A list of strings representing the names of the columns to plot.
+    hue_var (str): The column name representing the variable to distinguish the boxplots by.
+
+    Returns:
+        None
+    """
+    num_plots = len(cols)
+    num_cols = 2
+    num_rows = (num_plots + num_cols - 1) // num_cols
+
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(30, 10*num_rows))
+
+    #Flatten the axs array for easy indexing
+    axs = axs.flatten()
+
+    for i, column in enumerate(cols):
+        ax = axs[i]
+        individuals.boxplot(column=column, by=by_col, ax=ax)
+        ax.set_xlabel('')
+        ax.set_title(column + ' by ' + by_col )
+        
+    for i in range(num_plots, len(axs)):
+        axs[i].set_visible(False)
+
+    #Adjust spacing between subplots
+    fig.tight_layout()
+
+    plt.show()
+
+
+
+def barplot_by(df: pd.DataFrame, cols: List[str], by_col) -> None:
+    """
+    Create boxplots of discrete variables grouped by another discrete variable.
+
+    Parameters:
+    df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    cols (list[str]): A list of strings representing the names of the columns to plot.
+    hue_var (str): The column name representing the variable to distinguish the boxplots by.
+
+    Returns:
+        None
+    """
+    num_plots = len(cols)
+    num_cols = 2
+    num_rows = (num_plots + num_cols - 1) // num_cols
+
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 10*num_rows))
+
+    #Flatten the axs array for easy indexing
+    axs = axs.flatten()
+
+    for i, column in enumerate(cols):
+        ax = axs[i]
+        df.groupby(column)[by_col].value_counts().unstack().plot(kind='bar', ax=ax)
+        ax.set_xlabel('')
+        ax.set_title(column + ' by Cluster')
+
+    for i in range(num_plots, len(axs)):
+        axs[i].set_visible(False)
+
+    #Adjust spacing between subplots
+    fig.tight_layout()
+
+    #Show the plot
+    plt.show()
+
 
 
 # ------- EXPLORAÇÃO
@@ -477,12 +574,12 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
     Compute and visualize the Silhouette method for evaluating the quality of a clustering solution.
 
     Parameters:
-    - df (pd.DataFrame): A DataFrame containing the data with the 
+    df (pd.DataFrame): A DataFrame containing the data with the 
     designated clusters.
-    - cluster_col (str): The name of the column containing the cluster information.
+    cluster_col (str): The name of the column containing the cluster information.
 
     Returns:
-    - None: Displays the Silhouette plot and prints the Silhouette score.
+        None: Displays the Silhouette plot and prints the Silhouette score.
     """
     #Access the cluster labels 
     cluster_labels = df[cluster_col]
@@ -539,31 +636,41 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
     print("Silhouette score for {} clusters: {:.4f}".format(n_clusters, silhouette_avg))
 
 
-def visualize_dimensionality_reduction(transformation, targets):
-  # create a scatter plot of the t-SNE output
-  plt.scatter(transformation[:, 0], transformation[:, 1], 
-              c=np.array(targets).astype(int), cmap=plt.cm.tab10)
 
-  labels = np.unique(targets)
 
-  # create a legend with the class labels and colors
-  handles = [plt.scatter([],[], c=plt.cm.tab10(i), label=label) for i, label in enumerate(labels)]
-  plt.legend(handles=handles, title='Classes')
+def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
+    """
+    Plot the UMAP embedding of a DataFrame, colouring by cluster.
 
-  plt.show()
+    Parameters:
+    df (pd.DataFrame): A DataFrame containing the data with the 
+    designated clusters.
+    cluster_col (str): The name of the column containing the cluster information.
 
-#Corrigir o UMAP
-def umap_plot(df: pd.DataFrame, cluster_col: str) -> None: 
+    Returns:
+        None
+    """
+    #Fit the umap
     reducer = umap.UMAP(random_state=42)
+
+    #Extract cluster labels
     labels = df[cluster_col].values
     n_clusters = df[cluster_col].nunique()
+    #Compute the UMAP embedding
     embedding = reducer.fit_transform(df)
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='viridis')
+    
+    #Create a colormap with a varying number of colors based on the number of clusters
+    cmap = plt.cm.get_cmap('viridis', n_clusters)
+    
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap=cmap)
     plt.gca().set_aspect('equal', 'datalim')
-    plt.colorbar(boundaries=np.arange(8)-0.5).set_ticks(np.arange(7))
+    
+    #Adjust the colorbar to match the number of clusters
+    bounds = np.arange(n_clusters + 1) - 0.5
+    ticks = np.arange(n_clusters)
+    plt.colorbar(boundaries=bounds, ticks=ticks)
+    
     plt.show()
-    #visualize_dimensionality_reduction(embedding, labels)
-
 
 
 
