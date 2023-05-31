@@ -319,40 +319,6 @@ def plot_bar_charts(df: pd.DataFrame, cols: list[str]) -> None:
         plt.show()
 
 
-#FUNÇÃO MADALENA SPLIT HISTOGRAMA
-def plot_split_histogram(data, split_value):
-    split_data1 = data[data <= split_value]
-    split_data2 = data[data > split_value]
-
-    q75_1, q25_1 = np.percentile(split_data1, [75 ,25])
-    iqr_1 = q75_1 - q25_1
-    bin_width_1 = 2 * iqr_1 * len(split_data1)**(-1/3)
-    bins_1 = int((split_data1.max() - split_data1.min()) / bin_width_1)
-
-    q75_2, q25_2 = np.percentile(split_data2, [75 ,25])
-    iqr_2 = q75_2 - q25_2
-    bin_width_2 = 2 * iqr_2 * len(split_data2)**(-1/3)
-    bins_2 = int((split_data2.max() - split_data2.min()) / bin_width_2)
-
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10))
-
-    sns.histplot(x=split_data1, bins=bins_1, color='lightblue', ax=ax1)
-    ax1.set_title(f'{data.name} histogram (0-{split_value})', fontsize=14)
-    ax1.set_xlabel(data.name, fontsize=12)
-    ax1.set_ylabel('Frequency', fontsize=12)
-    ax1.set_xlim([0, split_value])
-
-    sns.histplot(x=split_data2, bins=bins_2, color='lightblue', ax=ax2)
-    ax2.set_title(f'{data.name} histogram ({split_value}-{data.max()})', fontsize=14)
-    ax2.set_xlabel(data.name, fontsize=12)
-    ax2.set_ylabel('Frequency', fontsize=12)
-    ax2.set_xlim([split_value, data.max()])
-
-    plt.subplots_adjust(hspace=0.5)
-    plt.show()
-
-# o unico problema aqui é o facto dos eixos do y não estarem iguais para os dois gráficos, mas a função esta feita para que seja possivel 
-# escolhr onde queremos fazer o split
 
 
 def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> folium.folium.Map:
@@ -573,14 +539,32 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
     print("Silhouette score for {} clusters: {:.4f}".format(n_clusters, silhouette_avg))
 
 
+def visualize_dimensionality_reduction(transformation, targets):
+  # create a scatter plot of the t-SNE output
+  plt.scatter(transformation[:, 0], transformation[:, 1], 
+              c=np.array(targets).astype(int), cmap=plt.cm.tab10)
+
+  labels = np.unique(targets)
+
+  # create a legend with the class labels and colors
+  handles = [plt.scatter([],[], c=plt.cm.tab10(i), label=label) for i, label in enumerate(labels)]
+  plt.legend(handles=handles, title='Classes')
+
+  plt.show()
+
+#Corrigir o UMAP
 def umap_plot(df: pd.DataFrame, cluster_col: str) -> None: 
     reducer = umap.UMAP(random_state=42)
     labels = df[cluster_col].values
+    n_clusters = df[cluster_col].nunique()
     embedding = reducer.fit_transform(df)
     plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap='viridis')
     plt.gca().set_aspect('equal', 'datalim')
-    plt.colorbar(boundaries=np.arange(7)-0.5).set_ticks(np.arange(6))
+    plt.colorbar(boundaries=np.arange(8)-0.5).set_ticks(np.arange(7))
     plt.show()
+    #visualize_dimensionality_reduction(embedding, labels)
+
+
 
 
 #Association Rules -> só esta a funcionar para a o cluster_kmeansZ
