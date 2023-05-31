@@ -17,6 +17,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import folium
 from folium.plugins import HeatMap
+import matplotlib.colors as mcolors
 
 # Umap library
 import umap
@@ -31,6 +32,21 @@ from mlxtend.preprocessing import TransactionEncoder
 import warnings
 import ast
 warnings.filterwarnings("ignore")
+
+
+
+colors_dict = {
+    0: "#5D0000",
+    1: "#39E34B",
+    2: "#3981E3",
+    3: "#FFC300",
+    4: "#E339A8",
+    5: "#5D00A7",
+    6: "#88FFFB",
+    7: "#FFC088",
+    8: "#E1AFAF"}
+
+
 
 #Functions
 
@@ -278,9 +294,19 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
             print(f"Skipping column '{col}' - not a numeric datatype")
             continue
         
-        #Plot the histogram for the column.
+        # #Plot the histogram for the column.
         fig, ax = plt.subplots(figsize=(12, 4))
-        sns.histplot(data= df, x=col, bins=bins, color='lightblue', ax=ax, hue=hue_var)
+        # sns.histplot(data= df, x=col, bins=bins, color='lightblue', ax=ax, hue=hue_var)
+
+        # Determine the color for the histogram based on hue_var
+        if hue_var is not None:
+            hue_values = df[hue_var]
+            colors = [colors_dict.get(value, 'lightblue') for value in hue_values]
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors)
+        else:
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='lightblue', hue=hue_var)
+        
+
         #Set title and labels.
         ax.set_title(f'{col} histogram', fontsize=14)
         ax.set_xlabel(col, fontsize=12)
@@ -363,17 +389,16 @@ def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[in
     cols (list[str]): A list of strings representing the names of the columns to plot.
     hue_var (str): The column name representing the variable to color the plot.
     sampling (Union[int, bool], optional): The number of samples to include in the pairplot.
-            If False, no sampling is performed. Defaults to 5000.
+            If 0, no sampling is performed. Defaults to 5000.
 
     Returns:
         None
     """
-    colors = ['#F29687','#5D64AC','#EFD56C','#B5699C','#569F6E', '#5D0000']
-    if not sampling:
-        sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors)
+    if sampling == 0:
+        sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
         plt.show()
     else:
-        sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors)
+        sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
         plt.show()
 
 
@@ -416,12 +441,12 @@ def boxplot_by(individuals: pd.DataFrame, cols: List[str], by_col: Union[str, No
 
 def barplot_by(df: pd.DataFrame, cols: List[str], by_col) -> None:
     """
-    Create boxplots of discrete variables grouped by another discrete variable.
+    Create barcharts of discrete variables grouped by another discrete variable.
 
     Parameters:
     df (pd.DataFrame): The pandas DataFrame with the data to plot.
     cols (list[str]): A list of strings representing the names of the columns to plot.
-    hue_var (str): The column name representing the variable to distinguish the boxplots by.
+    hue_var (str): The column name representing the variable to distinguish the barplots by.
 
     Returns:
         None
@@ -437,9 +462,11 @@ def barplot_by(df: pd.DataFrame, cols: List[str], by_col) -> None:
 
     for i, column in enumerate(cols):
         ax = axs[i]
-        df.groupby(column)[by_col].value_counts().unstack().plot(kind='bar', ax=ax)
+        #df.groupby(column)[by_col].value_counts().unstack().plot(kind='bar', ax=ax, color=[colors_dict.get(x, 'gray') for x in df[cols].columns])
+        plot_data = df.groupby(column)[by_col].value_counts().unstack()
+        plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, 'gray') for x in plot_data.columns])
         ax.set_xlabel('')
-        ax.set_title(column + ' by Cluster')
+        ax.set_title(column + ' by ' + by_col)
 
     for i in range(num_plots, len(axs)):
         axs[i].set_visible(False)
@@ -610,7 +637,8 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
         y_upper = y_lower + size_cluster_i
 
         #Color the clusters
-        color = plt.cm.get_cmap("Spectral")(float(i) / n_clusters)
+        #color = plt.cm.get_cmap("Spectral")(float(i) / n_clusters)
+        color = colors_dict[i]
         ax.fill_betweenx(np.arange(y_lower, y_upper), 0, ith_cluster_silhouette_values,
                         facecolor=color, edgecolor=color, alpha=0.7)
 
@@ -636,8 +664,6 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
     print("Silhouette score for {} clusters: {:.4f}".format(n_clusters, silhouette_avg))
 
 
-
-
 def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     """
     Plot the UMAP embedding of a DataFrame, colouring by cluster.
@@ -660,17 +686,26 @@ def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     embedding = reducer.fit_transform(df)
     
     #Create a colormap with a varying number of colors based on the number of clusters
-    cmap = plt.cm.get_cmap('viridis', n_clusters)
+    #cmap = plt.cm.get_cmap('viridis', n_clusters)
     
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap=cmap)
+    #plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap=cmap)
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=[colors_dict[label] for label in labels])
     plt.gca().set_aspect('equal', 'datalim')
     
-    #Adjust the colorbar to match the number of clusters
-    bounds = np.arange(n_clusters + 1) - 0.5
-    ticks = np.arange(n_clusters)
-    plt.colorbar(boundaries=bounds, ticks=ticks)
-    
+    # Create a colormap using the colors from the dictionary
+    cmap = mcolors.ListedColormap([colors_dict[label] for label in range(n_clusters)])
+    norm = mcolors.BoundaryNorm(np.arange(n_clusters + 1) - 0.5, n_clusters)
+
+    # Create a colorbar with the colors and labels from the dictionary
+    cbar = plt.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=norm))
+    cbar.set_ticks(np.arange(n_clusters))
+    cbar.set_ticklabels([f"{label}" for label in range(n_clusters)])
+
     plt.show()
+
+
+
+
 
 
 
