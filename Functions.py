@@ -301,10 +301,10 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
         # Determine the color for the histogram based on hue_var
         if hue_var is not None:
             hue_values = df[hue_var]
-            colors = [colors_dict.get(value, 'lightblue') for value in hue_values]
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors)
+            colors = [colors_dict.get(value, 'grey') for value in hue_values]
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=['blue', 'green', 'red'])
         else:
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='lightblue', hue=hue_var)
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='grey', hue=hue_var)
         
 
         #Set title and labels.
@@ -402,7 +402,7 @@ def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[in
         plt.show()
 
 
-def boxplot_by(individuals: pd.DataFrame, cols: List[str], by_col: Union[str, None] = None) -> None:
+def boxplot_by(df: pd.DataFrame, cols: List[str], by_col: Union[str, None] = None) -> None:
     """
     Create boxplots of continuous variables grouped by a discrete variable.
 
@@ -425,7 +425,7 @@ def boxplot_by(individuals: pd.DataFrame, cols: List[str], by_col: Union[str, No
 
     for i, column in enumerate(cols):
         ax = axs[i]
-        individuals.boxplot(column=column, by=by_col, ax=ax)
+        df.boxplot(column=column, by=by_col, ax=ax)
         ax.set_xlabel('')
         ax.set_title(column + ' by ' + by_col )
         
