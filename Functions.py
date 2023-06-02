@@ -303,7 +303,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
         if hue_var is not None:
             hue_values = df[hue_var]
             colors = [colors_dict.get(value, 'grey') for value in hue_values]
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=['blue', 'green', 'red'])
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors)
         else:
             sns.histplot(data=df, x=col, bins=bins, ax=ax, color='lightblue', linewidth=1, edgecolor=".2")
         
