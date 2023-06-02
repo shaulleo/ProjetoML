@@ -275,6 +275,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
 
     """
     #Loop over each column.
+    sns.set_style(style='white')
     for col in cols:
         data__ = df[col]
             #Determine the optimal number of bins based on the data type of the column.
@@ -302,9 +303,9 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
         if hue_var is not None:
             hue_values = df[hue_var]
             colors = [colors_dict.get(value, 'grey') for value in hue_values]
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=['blue', 'green', 'red'])
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors)
         else:
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='grey', hue=hue_var)
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='lightblue', linewidth=1, edgecolor=".2")
         
 
         #Set title and labels.
@@ -327,6 +328,7 @@ def plot_bar_charts(df: pd.DataFrame, cols: list[str]) -> None:
     Returns:
     None
     """
+    sns.set_style(style='white')
     #Loop over each column:
     for col in cols:
         #Plot the bar chart for the column.
@@ -373,11 +375,13 @@ def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> foli
 
 def regional_treemap(df):
     sns.set_style(style="whitegrid") 
-    sizes= df["count"].values 
-    label=df["region"]
-    squarify.plot(sizes=sizes, label=label, alpha=0.6).set(title='Observations by Region')
+    sizes = df["count"].values 
+    labels = [f"{r}\n({c})" for r, c in zip(df["region"], df["count"])]
+    colors = ['#91DCEA', '#64CDCC', '#5FBB68', '#F9D23C', '#F9A729', '#FD6F30']
+    
+    squarify.plot(sizes=sizes, label=labels, alpha=0.6, text_kwargs={'fontsize': 12}).set(title='Observations by Region')
     plt.axis('off')
-    sns.set(rc={'figure.figsize':(17,17)})
+    sns.set(rc={'figure.figsize':(18,18)})
     plt.show()
 
 def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[int, bool] = 5000) -> None:
@@ -394,6 +398,7 @@ def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[in
     Returns:
         None
     """
+    sns.set_style(style='white')
     if sampling == 0:
         sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
         plt.show()
