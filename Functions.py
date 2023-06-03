@@ -45,7 +45,31 @@ colors_dict = {
     6: "#88FFFB",
     7: "#FFC088",
     8: "#E1AFAF"}
-
+colors_dict_2 = {
+    0: "#5D0000",
+    1: "#39E34B",
+    2: "#3981E3",
+    3: "#FFC300",
+    4: "#E339A8",
+    5: "#5D00A7",
+    6: "#88FFFB",
+    7: "#FFC088",
+    8: "#E1AFAF",
+    9: "#FFA500",
+    10: "#FF69B4",
+    11: "#00FF00",
+    12: "#0000FF",
+    13: "#FFFF00",
+    14: "#FF00FF",
+    15: "#00FFFF",
+    16: "#800000",
+    17: "#008000",
+    18: "#000080",
+    19: "#808000",
+    20: "#800080",
+    21: "#FF4500",
+    22: "#00CED1"
+}
 
 
 #Functions
@@ -482,6 +506,46 @@ def barplot_by(df: pd.DataFrame, cols: List[str], by_col) -> None:
     #Show the plot
     plt.show()
 
+def barplot_by_2(df: pd.DataFrame, cols: List[str], by_col) -> None:
+    """
+    Create barcharts of discrete variables grouped by another discrete variable.
+
+    Parameters:
+    df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    cols (list[str]): A list of strings representing the names of the columns to plot.
+    by_col (str): The column name representing the variable to distinguish the barplots by.
+
+    Returns:
+        None
+    """
+    num_plots = len(cols)
+    num_cols = 2
+    num_rows = (num_plots + num_cols - 1) // num_cols
+
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 10*num_rows))
+
+    # Flatten the axs array for easy indexing
+    axs = axs.flatten()
+
+    for i, column in enumerate(cols):
+        ax = axs[i]
+        plot_data = df.groupby(by_col)[column].value_counts().unstack()
+
+        # Set the values of the discrete variables as labels
+        plot_data.index = plot_data.index.astype(str)
+
+        plot_data.plot(kind='bar', ax=ax, color=[colors_dict_2.get(x, 'gray') for x in plot_data.columns])
+        ax.set_xlabel(by_col)
+        ax.set_title(column + ' by ' + by_col)
+
+    for i in range(num_plots, len(axs)):
+        axs[i].set_visible(False)
+
+    # Adjust spacing between subplots
+    fig.tight_layout()
+
+    # Show the plot
+    plt.show()
 
 
 # ------- EXPLORAÇÃO
