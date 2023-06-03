@@ -81,16 +81,15 @@ def extract_education(row: str) -> int:
     Extracts education level from a given customer name.
 
     Parameters:
-    row (str): A string representing the name of the customer.
+    - row (str): A string representing the name of the customer.
 
     Returns:
-    int: An integer representing the education level of the customer:
+    - education (int): An integer representing the education level of the customer:
          1: If the customer has a BSc. degree
          2: If the customer has a MSc. degree
          3: If the customer does not have a degree
          0: If the customer's name is not sufficient to 
-         determine their education level
-
+            determine their education level
     """
         #Split the name into a list based on whitespace.
     name_list = row.split(' ')
@@ -117,13 +116,16 @@ def clean_names(row: str) -> str:
     returning only their first and last name.
 
     Parameters:
-    row (str): A string representing the name of the customer.
+    - row (str): A string representing the name of the customer.
 
     Returns:
-    str: A string representing the cleaned name of the customer.
+    - name (str): A string representing the cleaned name of the customer.
 
     """
+        #Split the names based on whitespace
     name_list = row.split(' ')
+        #If the total number of names is superior to two, we assume there is an
+            #education level associated
     if len(name_list) > 2:
         name = str(name_list[1] + ' ' + name_list[2])
     else:
@@ -139,11 +141,11 @@ def process_birthdate(df: pd.DataFrame, birthdate: str) -> pd.DataFrame:
     columns, and calculate their age.
 
     Parameters:
-    df (pd.DataFrame): A pandas DataFrame containing the birthdate column.
-    birthdate (str): A string representing the name of the birthdate column.
+    - df (pd.DataFrame): A pandas DataFrame containing the birthdate column.
+    - birthdate (str): A string representing the name of the birthdate column.
 
     Returns:
-    pd.DataFrame: A pandas DataFrame with the original data and three new 
+    - df (pd.DataFrame): A pandas DataFrame with the original data and three new 
     columns for birthday and birthmonth as well as a column for age.
 
     """
@@ -167,11 +169,11 @@ def get_address(row: pd.Series) -> str:
     Retrieves the customer's full address based on their given latitude and longitude values.
 
     Parameters:
-    row (pd.Series): A pandas series containing 'latitude' and 'longitude' 
+    - row (pd.Series): A pandas series containing 'latitude' and 'longitude' 
                     columns representing the coordinates of the customer's address.
 
     Returns:
-    str: A string representing the full address of the customer.
+    - full address (str): A string representing the full address of the customer.
 
     """
         #Create a Nominatim geocoding instance.
@@ -188,10 +190,10 @@ def clean_address(row: str) -> str:
      Extract the region information from the full address.
 
      Parameters:
-     row (str): A string representing the full address.
+     - row (str): A string representing the full address.
 
      Returns:
-     str: A string representing the region of the address.
+     - str: A string representing the region of the address.
 
     """
     #Split the full address into a list based on comma separators.
@@ -212,13 +214,13 @@ def encode_address(df: pd.DataFrame, lat: str, long: str, address: str) -> pd.Da
     of the data for every region.
 
     Parameters:
-    df (pd.DataFrame): A pandas DataFrame containing the data to be encoded.
-    lat (str): A string representing the name of the latitude column in the DataFrame.
-    long (str): A string representing the name of the longitude column in the DataFrame.
-    address (str): A string representing the name of the address column in the DataFrame.
+    - df (pd.DataFrame): A pandas DataFrame containing the data to be encoded.
+    - lat (str): A string representing the name of the latitude column in the DataFrame.
+    - long (str): A string representing the name of the longitude column in the DataFrame.
+    - address (str): A string representing the name of the address column in the DataFrame.
 
     Returns:
-    pd.DataFrame: A pandas DataFrame with columns 'latitude_encoded' and 'longitude_encoded' 
+    - df (pd.DataFrame): A pandas DataFrame with columns 'latitude_encoded' and 'longitude_encoded' 
     added to it, representing the encoded coordinates of the observation.
 
     """
@@ -247,12 +249,12 @@ def binary_encoding(df: pd.DataFrame, col: str, condition: bool) -> pd.DataFrame
     otherwise it is set to 1.
 
     Parameters:
-    df (pd.DataFrame): The pandas DataFrame to encode.
-    col (str): The name of the column to encode.
-    condition (bool): The condition used to encode the column.
+    - df (pd.DataFrame): The pandas DataFrame to encode.
+    - col (str): The name of the column to encode.
+    - condition (bool): The condition used to encode the column.
 
     Returns:
-    pd.DataFrame: The pandas DataFrame with the specified column encoded.
+    - df (pd.DataFrame): The pandas DataFrame with the specified column encoded.
 
     """
     #Replace the designated column by its encoding based on the provided condition.
@@ -267,11 +269,11 @@ def integer_convert(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
     Converts multiple columns of a pandas DataFrame to integer data type.
 
     Parameters:
-    df (pd.DataFrame): A pandas DataFrame.
-    cols (list[str]): A list of strings representing the names of the columns to convert.
+    - df (pd.DataFrame): A pandas DataFrame.
+    - cols (list[str]): A list of strings representing the names of the columns to convert.
 
     Returns:
-    pd.DataFrame: A pandas DataFrame with the columns converted to integer data type.
+    - df (pd.DataFrame): A pandas DataFrame with the columns converted to integer data type.
 
     """
     #Convert the columns into int64 data type.
@@ -289,13 +291,13 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
     Plots histograms using seaborn for specified columns of a pandas DataFrame.
 
     Parameters:
-    df (pd.DataFrame): The pandas DataFrame with the data to plot.
-    cols (list[str]): A list of strings representing the names of the columns to plot.
-    hue_var (str): The column name representing the variable to color the plot.
+    - df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    - cols (list[str]): A list of strings representing the names of the columns to plot.
+    - hue_var (str): The column name representing the variable to color the plot.
 
 
     Returns:
-    None.
+    - None
 
     """
     #Loop over each column.
@@ -346,11 +348,11 @@ def plot_bar_charts(df: pd.DataFrame, cols: list[str]) -> None:
     Plots bar charts using seaborn for specified columns of a pandas DataFrame.
 
     Parameters:
-    df (pd.DataFrame): The pandas DataFrame with the data to plot.
-    cols (list[str]): A list of strings representing the names of the columns to plot.
+    - df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    - cols (list[str]): A list of strings representing the names of the columns to plot.
 
     Returns:
-    None
+    - None
     """
     sns.set_style(style='white')
     #Loop over each column:
@@ -378,13 +380,13 @@ def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> foli
     Plot a heatmap of the data, based on a specific variable, centered in Lisbon.
 
     Parameters:
-    df (pd.DataFrame): The dataframe containing the latitude, longitude, and variable data.
-    lat (str): A string representing the name of the latitude column in the DataFrame.
-    long (str): A string representing the name of the longitude column in the DataFrame.
-    col (str): The name of the column in the dataframe containing the  data to be represented.
+    - df (pd.DataFrame): The dataframe containing the latitude, longitude, and variable data.
+    - lat (str): A string representing the name of the latitude column in the DataFrame.
+    - long (str): A string representing the name of the longitude column in the DataFrame.
+    - col (str): The name of the column in the dataframe containing the  data to be represented.
 
     Returns:
-    folium.folium.Map: A folium Map object displaying the heatmap.
+    - map_lisbon (folium.folium.Map): A folium Map object displaying the heatmap.
     """
         #Create a folium map centered in Lisbon.
     map_lisbon = folium.Map(location=[38.736946, -9.142685], zoom_start=12)
@@ -397,18 +399,41 @@ def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> foli
     return map_lisbon
 
 
-def regional_treemap(df):
+def regional_treemap(df: pd.DataFrame) -> None:
+    """
+    Plots a Treemap visualization of the number of observations by region.
+
+    Parameters:
+    - df (pd.DataFrame): A pandas DataFrame containing the data 
+        grouped by region, including the counts and the region itself.
+    Returns:
+    - None
+    """
     sns.set_style(style="whitegrid") 
     sizes = df["count"].values 
     labels = [f"{r}\n({c})" for r, c in zip(df["region"], df["count"])]
-    colors = ['#91DCEA', '#64CDCC', '#5FBB68', '#F9D23C', '#F9A729', '#FD6F30']
-    
-    squarify.plot(sizes=sizes, label=labels, alpha=0.6, text_kwargs={'fontsize': 12}).set(title='Observations by Region')
+
+    #Sort sizes and labels in descending order
+    sorted_indices = sorted(range(len(sizes)), key=lambda k: sizes[k], reverse=True)
+    sorted_sizes = [sizes[i] for i in sorted_indices]
+    sorted_labels = [labels[i] for i in sorted_indices]
+
+    #Create a dark-to-light color palette based on sorted sizes
+    palette = sns.color_palette("Blues", n_colors=len(df))
+    palette = list(reversed(palette))
+
+    plt.figure(figsize=(18, 10))
+
+    #Plot the tree map using squarify
+    squarify.plot(sizes=sorted_sizes, label=sorted_labels, alpha=0.8, color=palette, text_kwargs={'fontsize': 10})
+    plt.title('Observations by Region', fontsize=16)
     plt.axis('off')
-    sns.set(rc={'figure.figsize':(18,18)})
     plt.show()
 
-def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[int, bool] = 5000) -> None:
+
+
+#DOCSTRINGS CORRIGIR!!!
+def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str = None, sampling: Union[int, bool] = 5000, data_type: str = 'continuous', transparency=0.4) -> None:
     """
     Create a pairplot for the specified columns of a DataFrame, with optional sampling.
 
@@ -418,17 +443,29 @@ def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str, sampling: Union[in
     hue_var (str): The column name representing the variable to color the plot.
     sampling (Union[int, bool], optional): The number of samples to include in the pairplot.
             If 0, no sampling is performed. Defaults to 5000.
+    
 
     Returns:
         None
     """
     sns.set_style(style='white')
-    if sampling == 0:
-        sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
-        plt.show()
-    else:
-        sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = 0.4), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
-        plt.show()
+
+    if data_type == 'continuous':
+        if sampling == 0:
+            sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            plt.show()
+        else:
+            sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            plt.show()
+
+    elif data_type == 'discrete':
+        if sampling == 0:
+            sns.pairplot(df[cols], hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            plt.show()
+        else:
+            sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            plt.show()
+
 
 
 def boxplot_by(df: pd.DataFrame, cols: List[str], by_col: Union[str, None] = None) -> None:
@@ -771,10 +808,6 @@ def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     cbar.set_ticklabels([f"{label}" for label in range(n_clusters)])
 
     plt.show()
-
-
-
-
 
 
 
