@@ -450,6 +450,7 @@ def regional_treemap(df: pd.DataFrame) -> None:
     plt.show()
 
 
+
 def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str = None, sampling: int = 5000, data_type: str = 'continuous', transparency: float =0.4) -> None:
     """
     Create a pairplot for the specified columns of a DataFrame, with optional sampling.
@@ -490,7 +491,7 @@ def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str = None, sampling: i
 
 
 
-def boxplot_by(df: pd.DataFrame, cols: List[str], by_col: Union[str, None] = None) -> None:
+def boxplot_by(df: pd.DataFrame, cols: list[str], by_col: Union[str, None] = None) -> None:
     """
     Create boxplots of continuous variables grouped by a discrete variable.
 
@@ -525,9 +526,22 @@ def boxplot_by(df: pd.DataFrame, cols: List[str], by_col: Union[str, None] = Non
 
     plt.show()
 
-def scatterplot(df, cols, by_col):
-    sns.set_style(style='white')
 
+
+def scatterplot(df: pd.DataFrame, cols:list[str], by_col: str) -> None:
+    """
+    Plots a set of scatterplots of given list of variables against one specific variable.
+
+    Parameters:
+    - df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    - cols (list[str]): A list of strings representing the names of the columns to plot.
+    - by_col (str): The column name that represents the y axis.
+
+
+    Returns:
+    - None
+    """
+    sns.set_style(style='white')
     #Define how the plots will be placed, based on the number of features being visualized.
     num_plots = len(cols)
     num_cols = 2
@@ -539,12 +553,12 @@ def scatterplot(df, cols, by_col):
 
     for i, col in enumerate(cols):
         ax = axs[i]
-        sns.scatterplot(x=col, y=by_col, data=df, ax=ax, alpha = 0.2)
+        sns.scatterplot(x=col, y= by_col, data= df, ax=ax, alpha = 0.2)
         ax.set_title(col.capitalize())
     
     plt.tight_layout()
-    plt.show()
     
+    plt.show()
 
 
 
