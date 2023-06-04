@@ -36,8 +36,8 @@ warnings.filterwarnings("ignore")
 
 
 colors_dict = {
-    0: "#5D0000",
-    1: "#39E34B",
+    0: "#5D0000" , 
+    1: "#39E34B", 
     2: "#3981E3",
     3: "#FFC300",
     4: "#E339A8",
@@ -69,6 +69,32 @@ colors_dict_2 = {
     20: "#800080",
     21: "#FF4500",
     22: "#00CED1"
+}
+violin = {
+    0: "#5b9abd", 
+    1: "#5b9abd",
+    2: "#5b9abd",
+    3: "#5b9abd",
+    4: "#5b9abd",
+    5: "#5b9abd",
+    6: "#5b9abd",
+    7: "#5b9abd",
+    8: "#5b9abd",
+    9: "#5b9abd",
+    10: "#5b9abd",
+    11: "#5b9abd",
+    12: "#5b9abd",
+    13: "#5b9abd",
+    14: "#5b9abd",
+    15: "#5b9abd",
+    16: "#5b9abd",
+    17: "#5b9abd",
+    18: "#5b9abd",
+    19: "#5b9abd",
+    20: "#5b9abd",
+    21: "#5b9abd",
+    22: "#5b9abd",
+    23: "#5b9abd"
 }
 
 
@@ -325,7 +351,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var: str = None) -> N
             sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors_dict)
             ax.set_title(f'Histogram of {col} by {hue_var}', fontsize=14)
         else:
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='lightblue')
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, color='#5b9abd', linewidth=0.5, edgecolor=".2")
             ax.set_title(f'Histogram of {col}', fontsize=14)
         #Set title and labels.
         ax.set_xlabel(col, fontsize=12)
@@ -375,13 +401,15 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
             else:
                 plot_data = df.groupby(column)[by_col].value_counts().unstack()
             #Plot the data
-            plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, 'lightblue') for x in plot_data.columns])
+            plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, '#6aa8cc') for x in plot_data.columns])
             ax.set_xlabel('')
             ax.set_title(column + ' by ' + by_col)
         #If there is no grouping
         else:
             #Plot a simple bar chart
-            sns.countplot(x=column, data=df, ax=ax, color='lightblue', linewidth=1, edgecolor=".2")
+            sns.countplot(x=column, data=df, ax=ax, color='#6aa8cc', linewidth=0.5, edgecolor=".2")
+            ax.set_xticklabels(ax.get_xticklabels(), fontsize=8) 
+            ax.set_yticklabels(ax.get_yticklabels(), fontsize=8) 
 
     for i in range(num_plots, len(axs)):
         axs[i].set_visible(False)
@@ -391,6 +419,35 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
 
     plt.show()
 
+def plot_violinplot(df: pd.DataFrame, cols: list[str], by_col: str) -> None:
+    """
+    Plots a set of violin plots of given list of variables against one specific variable.
+
+    Parameters:
+    - df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    - cols (list[str]): A list of strings representing the names of the columns to plot.
+    - by_col (str): The column name that represents the y axis.
+
+    Returns:
+    - None
+    """
+    sns.set_style(style='white')
+    # Define how the plots will be placed, based on the number of features being visualized.
+    num_plots = len(cols)
+    num_cols = 2
+    num_rows = (num_plots + num_cols - 1) // num_cols
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(18, 5*num_rows))
+
+    # Flatten the axs array for easy indexing
+    axs = axs.flatten()
+
+    for i, col in enumerate(cols):
+        ax = axs[i]
+        sns.violinplot(x=by_col, y=col, data=df, ax=ax, palette= violin)
+        ax.set_title(col.capitalize())
+
+    plt.tight_layout()
+    plt.show()
 
 
 def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> folium.folium.Map:
@@ -438,7 +495,7 @@ def regional_treemap(df: pd.DataFrame) -> None:
     sorted_labels = [labels[i] for i in sorted_indices]
 
     #Create a dark-to-light color palette based on sorted sizes
-    palette = sns.color_palette("Blues", n_colors=len(df))
+    palette = sns.color_palette("Blues", n_colors=len(labels))
     palette = list(reversed(palette))
 
     plt.figure(figsize=(18, 10))
