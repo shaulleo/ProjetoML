@@ -286,92 +286,110 @@ def integer_convert(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
 #------- VISUALIZATION
 
 
-def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var = None) -> None:
+def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var: str = None) -> None:
     """
-    Plots histograms using seaborn for specified columns of a pandas DataFrame.
+    Plots histograms.
 
     Parameters:
     - df (pd.DataFrame): The pandas DataFrame with the data to plot.
     - cols (list[str]): A list of strings representing the names of the columns to plot.
-    - hue_var (str): The column name representing the variable to color the plot.
+    - hue_var (str): The column name representing the variable to color the plot. Default is None.
 
 
     Returns:
     - None
 
     """
-    #Loop over each column.
     sns.set_style(style='white')
-    for col in cols:
-        data__ = df[col]
-            #Determine the optimal number of bins based on the data type of the column.
-            #If the data type is an integer, assign the number of bins as the number of 
-            # unique values within the data.
-        if data__.dtype == 'int64':
-            bins = data__.nunique()
-            #If the data type is float, compute the optimum number of bins using 
-            # the Freedman–Diaconis rule.
-        elif data__.dtype == 'float64':
-            q75, q25 = np.percentile(data__, [75 ,25])
-            iqr = q75 - q25
-            bin_width = 2 * iqr * len(data__)**(-1/3)
-            bins = int((data__.max() - data__.min()) / bin_width)
-            #Otherwise, do not calculate the number of bins.
-        else:
-            print(f"Skipping column '{col}' - not a numeric datatype")
-            continue
-        
-        # #Plot the histogram for the column.
-        fig, ax = plt.subplots(figsize=(12, 4))
-        # sns.histplot(data= df, x=col, bins=bins, color='lightblue', ax=ax, hue=hue_var)
 
-        # Determine the color for the histogram based on hue_var
+    #Define how the plots will be placed, based on the number of features being visualized.
+    num_plots = len(cols)
+    num_cols = 2
+    num_rows = (num_plots + num_cols - 1) // num_cols
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(18, 5*num_rows))
+
+    #Flatten the axs array for easy indexing
+    axs = axs.flatten()
+
+    for i, col in enumerate(cols):
+        #Compute the optimum number of bins using 
+            # the Freedman–Diaconis rule.
+        data__ = df[col]
+        q75, q25 = np.percentile(data__, [75 ,25])
+        iqr = q75 - q25
+        bin_width = 2 * iqr * len(data__)**(-1/3)
+        bins = int((data__.max() - data__.min()) / bin_width)
+        ax = axs[i]
+        #If there is a hue value:
         if hue_var is not None:
-            hue_values = df[hue_var]
-            #colors = [colors_dict.get(value, 'grey') for value in hue_values]
             sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors_dict)
+            ax.set_title(f'Histogram of {col} by {hue_var}', fontsize=14)
         else:
             sns.histplot(data=df, x=col, bins=bins, ax=ax, color='lightblue')
-        
-
+            ax.set_title(f'Histogram of {col}', fontsize=14)
         #Set title and labels.
-        ax.set_title(f'{col} histogram', fontsize=14)
         ax.set_xlabel(col, fontsize=12)
         ax.set_ylabel('Frequency', fontsize=12)
 
-        plt.show()
+    for i in range(num_plots, len(axs)):
+        axs[i].set_visible(False)
+
+    #Adjust spacing between subplots
+    fig.tight_layout()
+
+    plt.show()
 
 
 
-def plot_bar_charts(df: pd.DataFrame, cols: list[str]) -> None:
+def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axis=True) -> None:
     """
-    Plots bar charts using seaborn for specified columns of a pandas DataFrame.
+    Plot bar charts, having the possibility of grouping them by another discrete variable.
 
     Parameters:
     - df (pd.DataFrame): The pandas DataFrame with the data to plot.
     - cols (list[str]): A list of strings representing the names of the columns to plot.
-
+    - by_col (str): The name of the column representing the variable to group the bar charts by. Default is None.
+    - invert_axis (bool): A boolean value indicating whether to invert the x-axis and y-axis. Default is True.
+                True is applicable for the analysis by cluster.
     Returns:
     - None
     """
-    sns.set_style(style='white')
-    #Loop over each column:
-    for col in cols:
-        #Plot the bar chart for the column.
-        fig, ax = plt.subplots(figsize=(12, 3))
-        sns.countplot(x=col, data=df, ax=ax, color='lightblue', linewidth=1, edgecolor=".2")
 
-        #Set title and labels.
-        ax.set_title(f'{col}', fontsize=12)
-        ax.set_xlabel(col, fontsize=10)
-        ax.set_ylabel('Count', fontsize=10)
+    #Define how the plots will be placed, based on the number of features being visualized.
+    num_plots = len(cols)
+    num_cols = 2
+    num_rows = (num_plots + num_cols - 1) // num_cols
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(18, 10*num_rows))
 
-        #Set font sizes for the axis.
-        ax.tick_params(axis='x', labelsize=8)
-        ax.tick_params(axis='y', labelsize=8)
+    #Flatten the axs array for easy indexing
+    axs = axs.flatten()
 
-        plt.show()
+    for i, column in enumerate(cols):
+        ax = axs[i]
+        #If grouping the data by a given column
+        if by_col is not None:
+            #If the analyzing by cluster (Want inverted axis)
+            if invert_axis:
+                #Define the data to be plotted
+                plot_data = df.groupby(by_col)[column].value_counts().unstack()
+            else:
+                plot_data = df.groupby(column)[by_col].value_counts().unstack()
+            #Plot the data
+            plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, 'lightblue') for x in plot_data.columns])
+            ax.set_xlabel('')
+            ax.set_title(column + ' by ' + by_col)
+        #If there is no grouping
+        else:
+            #Plot a simple bar chart
+            sns.countplot(x=column, data=df, ax=ax, color='lightblue', linewidth=1, edgecolor=".2")
 
+    for i in range(num_plots, len(axs)):
+        axs[i].set_visible(False)
+
+    #Adjust spacing between subplots
+    fig.tight_layout()
+
+    plt.show()
 
 
 
@@ -397,6 +415,7 @@ def plot_lisbon_heatmap(df: pd.DataFrame, lat: str, long: str, col: str) -> foli
             gradient={0.2: 'blue', 0.4: 'purple', 0.6: 'pink', 0.8: 'orange', 1.0: 'red'}).add_to(map_lisbon)
 
     return map_lisbon
+
 
 
 def regional_treemap(df: pd.DataFrame) -> None:
@@ -431,33 +450,36 @@ def regional_treemap(df: pd.DataFrame) -> None:
     plt.show()
 
 
-
-#DOCSTRINGS CORRIGIR!!!
-def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str = None, sampling: Union[int, bool] = 5000, data_type: str = 'continuous', transparency=0.4) -> None:
+def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str = None, sampling: int = 5000, data_type: str = 'continuous', transparency: float =0.4) -> None:
     """
     Create a pairplot for the specified columns of a DataFrame, with optional sampling.
 
     Parameters:
-    df (pd.DataFrame): The pandas DataFrame with the data to plot.
-    cols (list[str]): A list of strings representing the names of the columns to plot.
-    hue_var (str): The column name representing the variable to color the plot.
-    sampling (Union[int, bool], optional): The number of samples to include in the pairplot.
-            If 0, no sampling is performed. Defaults to 5000.
-    
+    - df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    - cols (list[str]): A list of strings representing the names of the columns to plot.
+    - hue_var (str): The column name representing the variable to color the plot.
+    - sampling (int): The number of samples to use when creating the pairplot.
+            If 0, all data is used. Defaults to 5000.
+    - data_type (str): The type of data being plotted, either 'continuous' or 'discrete', such that
+            the output is a scatterplot or a kdeplot, respectively. Defaults to 'continuous'.
+    - transparency (float): The transparency level of the plotted points. Defaults to 0.4.
 
     Returns:
-        None
+    - None
     """
+
     sns.set_style(style='white')
 
+    #If the features being used are continuos, plot the scatterplot and histograms on the pairplot.
     if data_type == 'continuous':
+        #If using sampling or not
         if sampling == 0:
             sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
             plt.show()
         else:
             sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
             plt.show()
-
+    #If the features being used are discrete, plot the KDEplots on the pairplot.
     elif data_type == 'discrete':
         if sampling == 0:
             sns.pairplot(df[cols], hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
@@ -503,89 +525,30 @@ def boxplot_by(df: pd.DataFrame, cols: List[str], by_col: Union[str, None] = Non
 
     plt.show()
 
+def scatterplot(df, cols, by_col):
+    sns.set_style(style='white')
 
-
-def barplot_by(df: pd.DataFrame, cols: List[str], by_col) -> None:
-    """
-    Create barcharts of discrete variables grouped by another discrete variable.
-
-    Parameters:
-    df (pd.DataFrame): The pandas DataFrame with the data to plot.
-    cols (list[str]): A list of strings representing the names of the columns to plot.
-    hue_var (str): The column name representing the variable to distinguish the barplots by.
-
-    Returns:
-        None
-    """
+    #Define how the plots will be placed, based on the number of features being visualized.
     num_plots = len(cols)
     num_cols = 2
     num_rows = (num_plots + num_cols - 1) // num_cols
-
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 10*num_rows))
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(18, 5*num_rows))
 
     #Flatten the axs array for easy indexing
     axs = axs.flatten()
 
-    for i, column in enumerate(cols):
+    for i, col in enumerate(cols):
         ax = axs[i]
-        #df.groupby(column)[by_col].value_counts().unstack().plot(kind='bar', ax=ax, color=[colors_dict.get(x, 'gray') for x in df[cols].columns])
-        plot_data = df.groupby(column)[by_col].value_counts().unstack()
-        plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, 'gray') for x in plot_data.columns])
-        ax.set_xlabel('')
-        ax.set_title(column + ' by ' + by_col)
-
-    for i in range(num_plots, len(axs)):
-        axs[i].set_visible(False)
-
-    #Adjust spacing between subplots
-    fig.tight_layout()
-
-    #Show the plot
+        sns.scatterplot(x=col, y=by_col, data=df, ax=ax, alpha = 0.2)
+        ax.set_title(col.capitalize())
+    
+    plt.tight_layout()
     plt.show()
-
-def barplot_by_2(df: pd.DataFrame, cols: List[str], by_col) -> None:
-    """
-    Create barcharts of discrete variables grouped by another discrete variable.
-
-    Parameters:
-    df (pd.DataFrame): The pandas DataFrame with the data to plot.
-    cols (list[str]): A list of strings representing the names of the columns to plot.
-    by_col (str): The column name representing the variable to distinguish the barplots by.
-
-    Returns:
-        None
-    """
-    num_plots = len(cols)
-    num_cols = 2
-    num_rows = (num_plots + num_cols - 1) // num_cols
-
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(20, 10*num_rows))
-
-    # Flatten the axs array for easy indexing
-    axs = axs.flatten()
-
-    for i, column in enumerate(cols):
-        ax = axs[i]
-        plot_data = df.groupby(by_col)[column].value_counts().unstack()
-
-        # Set the values of the discrete variables as labels
-        plot_data.index = plot_data.index.astype(str)
-
-        plot_data.plot(kind='bar', ax=ax, color=[colors_dict_2.get(x, 'gray') for x in plot_data.columns])
-        ax.set_xlabel(by_col)
-        ax.set_title(column + ' by ' + by_col)
-
-    for i in range(num_plots, len(axs)):
-        axs[i].set_visible(False)
-
-    # Adjust spacing between subplots
-    fig.tight_layout()
-
-    # Show the plot
-    plt.show()
+    
 
 
-# ------- EXPLORAÇÃO
+
+# ------- EXPLORATION
 
 def get_high_correlations(corr_matrix: pd.DataFrame, threshold: float) -> pd.DataFrame:
     """
@@ -615,6 +578,7 @@ def get_high_correlations(corr_matrix: pd.DataFrame, threshold: float) -> pd.Dat
     high_corr = high_corr.sort_values('Correlation', ascending=False)
     
     return high_corr
+
 
 
 def group_by_region(df: pd.DataFrame, region_col: str, cols: list[str]):
@@ -676,6 +640,7 @@ def plot_inertia(df: pd.DataFrame, k: int, times: int) -> None:
     
     ax.legend()
     plt.show()
+
 
 
 def compare_clusters(df: pd.DataFrame, cluster_col: str) -> pd.DataFrame:
@@ -770,6 +735,7 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
     print("Silhouette score for {} clusters: {:.4f}".format(n_clusters, silhouette_avg))
 
 
+
 def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     """
     Plot the UMAP embedding of a DataFrame, colouring by cluster.
@@ -810,8 +776,8 @@ def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     plt.show()
 
 
+# ------- ASSOCIATION RULES
 
-#Association Rules -> só esta a funcionar para a o cluster_kmeansZ
 
 def preprocess_basket(df: pd.DataFrame, cluster: int) -> pd.DataFrame:
     """
@@ -844,6 +810,7 @@ def preprocess_basket(df: pd.DataFrame, cluster: int) -> pd.DataFrame:
     return transaction_items
 
 
+
 def build_rules(df: pd.DataFrame, min_support: float, metric: str, min_threshold: float) -> pd.DataFrame:
     """
     Build association rules from frequent itemsets.
@@ -868,3 +835,23 @@ def build_rules(df: pd.DataFrame, min_support: float, metric: str, min_threshold
 
 
 
+#CONFIRMAR COMO É QUE ISTO FOI UTILIZADO COM A MADALENA E O BRUNO
+
+import itertools
+
+def create_scatterplots(data, continuous_vars, discrete_vars):
+    sns.set(style="ticks")
+    
+    num_continuous = len(continuous_vars)
+    num_discrete = len(discrete_vars)
+    fig, axes = plt.subplots(num_discrete, num_continuous, figsize=(12, 8), sharex='col', sharey='row')
+    axes = axes.flatten()
+    
+    for i, (continuous_var, discrete_var) in enumerate(itertools.product(continuous_vars, discrete_vars)):
+        ax = axes[i]
+        sns.scatterplot(x=continuous_var, y=discrete_var, data=data, ax=ax)
+        ax.set_xlabel(continuous_var)
+        ax.set_ylabel(discrete_var)
+    
+    plt.tight_layout()
+    plt.show()
