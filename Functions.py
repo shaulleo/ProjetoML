@@ -19,6 +19,7 @@ import folium
 from folium.plugins import HeatMap
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
+import matplotlib.ticker as ticker
 
 # Umap library
 import umap
@@ -36,25 +37,7 @@ warnings.filterwarnings("ignore")
 
 
 
-colors_gradient = {0 :'#dcf3dd',1 :'#c2f6c8',2 : '#8cf0ae',
-                   3 : '#54edaa', 4 :'#0dd0c5',5: '#06829c',6 :'#035277',7: '#001c3e',8: '#00102b',
-                   9: '#000c16', 10: '#00050a'}
 
-
-
-colors_dict_g = {
-    0: '#C9E6FF',
-    1: '#B5CFE6',
-    2: '#A1B8CC',
-    3: '#8DA1B3',
-    4: '#798A99',
-    5: '#657380',
-    6: '#515C66',
-    7: '#3C454C',
-    8: '#323A40',
-    9: '#282E33',
-    10: '#1E2326'
-}
 
 colors_dict = {0:  "#90a0de" , 1: "#ffb380", 2: "#e68aa5", 3: "#b07bdb" , 4: "#91e6c7",5: "#fce46d",6: "#b8b2b2"}
 
@@ -355,10 +338,9 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
             #If the analyzing by cluster (Want inverted axis)
             if invert_axis:
                 #Define the data to be plotted
-                
                 plot_data = df.groupby(by_col)[column].value_counts().unstack()
 
-                
+                #Define the color gradient
                 colors_gradient = {0 :'#f5fcf5',1 :'#c7fcce',2 : '#8cf0ae',
                    3 : '#54edaa', 4 :'#0dd0c5',5: '#06829c',6 :'#035277',7: '#001c3e',8: '#00102b',
                    9: '#000c16', 10: '#00050a', 11: '#00050a', 12: '#00050a', 13: '#00050a',14:'#00050a'}
@@ -375,6 +357,9 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
                 legend_handles = [mpatches.Patch(color=colors_gradient.get(col, '#6aa8cc'), label=col)
                                   for col in plot_data.columns]
                 ax.legend(handles=legend_handles)
+
+                # Set the x-axis tick labels as integers
+                ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
             else:
                 #Plot the data
@@ -425,10 +410,11 @@ def stacked_bar_chart(df: pd.DataFrame, col: str, by_col: str):
     ax.set_title(f'Stacked Bar Chart of {col} by {by_col}')
 
     #Rotate the x-axis tick labels to be vertical
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
 
-    #Show the legend
-    ax.legend()
+    #Show the legend with a title
+    legend = ax.legend(title=f'{col}')
+    legend.set_title(f'{col}')
 
     #Display the chart
     plt.show()
@@ -453,7 +439,7 @@ def plot_violinplot(df: pd.DataFrame, cols: list[str], by_col: str) -> None:
     num_rows = (num_plots + num_cols - 1) // num_cols
     fig, axs = plt.subplots(num_rows, num_cols, figsize=(18, 5*num_rows))
 
-    # Flatten the axs array for easy indexing
+    #Flatten the axs array for easy indexing
     axs = axs.flatten()
 
     for i, col in enumerate(cols):
@@ -843,18 +829,15 @@ def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     #Compute the UMAP embedding
     embedding = reducer.fit_transform(df)
     
-    #Create a colormap with a varying number of colors based on the number of clusters
-    #cmap = plt.cm.get_cmap('viridis', n_clusters)
-    
-    #plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap=cmap)
+
     plt.scatter(embedding[:, 0], embedding[:, 1], c=[colors_dict[label] for label in labels])
     plt.gca().set_aspect('equal', 'datalim')
     
-    # Create a colormap using the colors from the dictionary
+    #Create a colormap using the colors from the dictionary
     cmap = mcolors.ListedColormap([colors_dict[label] for label in range(n_clusters)])
     norm = mcolors.BoundaryNorm(np.arange(n_clusters + 1) - 0.5, n_clusters)
 
-    # Create a colorbar with the colors and labels from the dictionary
+    #Create a colorbar with the colors and labels from the dictionary
     cbar = plt.colorbar(plt.cm.ScalarMappable(cmap=cmap, norm=norm))
     cbar.set_ticks(np.arange(n_clusters))
     cbar.set_ticklabels([f"{label}" for label in range(n_clusters)])
