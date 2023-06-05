@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import folium
 from folium.plugins import HeatMap
 import matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
 
 # Umap library
 import umap
@@ -35,68 +36,27 @@ warnings.filterwarnings("ignore")
 
 
 
-colors_dict = {
-    0: "#5D0000" , 
-    1: "#39E34B", 
-    2: "#3981E3",
-    3: "#FFC300",
-    4: "#E339A8",
-    5: "#5D00A7",
-    6: "#88FFFB",
-    7: "#FFC088",
-    8: "#E1AFAF"}
-colors_dict_2 = {
-    0: "#5D0000",
-    1: "#39E34B",
-    2: "#3981E3",
-    3: "#FFC300",
-    4: "#E339A8",
-    5: "#5D00A7",
-    6: "#88FFFB",
-    7: "#FFC088",
-    8: "#E1AFAF",
-    9: "#FFA500",
-    10: "#FF69B4",
-    11: "#00FF00",
-    12: "#0000FF",
-    13: "#FFFF00",
-    14: "#FF00FF",
-    15: "#00FFFF",
-    16: "#800000",
-    17: "#008000",
-    18: "#000080",
-    19: "#808000",
-    20: "#800080",
-    21: "#FF4500",
-    22: "#00CED1"
-}
-violin = {
-    0: "#5b9abd", 
-    1: "#5b9abd",
-    2: "#5b9abd",
-    3: "#5b9abd",
-    4: "#5b9abd",
-    5: "#5b9abd",
-    6: "#5b9abd",
-    7: "#5b9abd",
-    8: "#5b9abd",
-    9: "#5b9abd",
-    10: "#5b9abd",
-    11: "#5b9abd",
-    12: "#5b9abd",
-    13: "#5b9abd",
-    14: "#5b9abd",
-    15: "#5b9abd",
-    16: "#5b9abd",
-    17: "#5b9abd",
-    18: "#5b9abd",
-    19: "#5b9abd",
-    20: "#5b9abd",
-    21: "#5b9abd",
-    22: "#5b9abd",
-    23: "#5b9abd"
+colors_gradient = {0 :'#dcf3dd',1 :'#c2f6c8',2 : '#8cf0ae',
+                   3 : '#54edaa', 4 :'#0dd0c5',5: '#06829c',6 :'#035277',7: '#001c3e',8: '#00102b',
+                   9: '#000c16', 10: '#00050a'}
+
+
+
+colors_dict_g = {
+    0: '#C9E6FF',
+    1: '#B5CFE6',
+    2: '#A1B8CC',
+    3: '#8DA1B3',
+    4: '#798A99',
+    5: '#657380',
+    6: '#515C66',
+    7: '#3C454C',
+    8: '#323A40',
+    9: '#282E33',
+    10: '#1E2326'
 }
 
+colors_dict = {0:  "#90a0de" , 1: "#ffb380", 2: "#e68aa5", 3: "#b07bdb" , 4: "#91e6c7",5: "#fce46d",6: "#b8b2b2"}
 
 
 # ---------- DATA PRE-PROCESSING
@@ -343,7 +303,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var: str = None) -> N
         q75, q25 = np.percentile(data__, [75 ,25])
         iqr = q75 - q25
         bin_width = 2 * iqr * len(data__)**(-1/3)
-        bins = int((data__.max() - data__.min()) / bin_width)
+        bins = int((data__.max() - data__.min()) / bin_width+0.1)
         ax = axs[i]
         #If there is a hue value:
         if hue_var is not None:
@@ -363,7 +323,6 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var: str = None) -> N
     fig.tight_layout()
 
     plt.show()
-
 
 
 def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axis=True) -> None:
@@ -396,11 +355,32 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
             #If the analyzing by cluster (Want inverted axis)
             if invert_axis:
                 #Define the data to be plotted
+                
                 plot_data = df.groupby(by_col)[column].value_counts().unstack()
+
+                
+                colors_gradient = {0 :'#f5fcf5',1 :'#c7fcce',2 : '#8cf0ae',
+                   3 : '#54edaa', 4 :'#0dd0c5',5: '#06829c',6 :'#035277',7: '#001c3e',8: '#00102b',
+                   9: '#000c16', 10: '#00050a', 11: '#00050a', 12: '#00050a', 13: '#00050a',14:'#00050a'}
+                   
+                #Plot the data with adjusted bar widths
+                width = 0.8 / len(plot_data.columns)
+                for j, col in enumerate(plot_data.columns):
+                    counts = plot_data[col]
+                    color = colors_gradient.get(col, '#6aa8cc')  # Get the corresponding color from the gradient
+                    x = np.arange(len(counts))
+                    ax.bar(x + j * width, counts.values, width=width, color=color, edgecolor='black')
+                
+                # Create a legend
+                legend_handles = [mpatches.Patch(color=colors_gradient.get(col, '#6aa8cc'), label=col)
+                                  for col in plot_data.columns]
+                ax.legend(handles=legend_handles)
+
             else:
+                #Plot the data
                 plot_data = df.groupby(column)[by_col].value_counts().unstack()
-            #Plot the data
-            plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, '#6aa8cc') for x in plot_data.columns])
+                plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, '#6aa8cc') for x in plot_data.columns])
+
             ax.set_xlabel('')
             ax.set_title(column + ' by ' + by_col)
         #If there is no grouping
@@ -417,6 +397,42 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
     fig.tight_layout()
 
     plt.show()
+
+
+def stacked_bar_chart(df: pd.DataFrame, col: str, by_col: str):
+    """
+    Plot stacked bar charts of a discrete variabled grouped by another.
+
+    Parameters:
+    - df (pd.DataFrame): The pandas DataFrame with the data to plot.
+    - col (str): The name of the column to plot..
+    - by_col (str): The name of the column representing the variable to group the bar charts by.
+
+    Returns:
+    - None
+    """
+    #Group the data by the columns and calculate the count and the percentual count
+    grouped_df = df.groupby([by_col, col]).size().unstack()
+    percent_df = grouped_df.apply(lambda x: x / x.sum() * 100, axis=1)
+
+    #Plot the stacked bar chart
+    fig, ax = plt.subplots()
+    percent_df.plot(kind='bar', stacked=True, ax=ax, color=[colors_dict.get(x, '#6aa8cc') for x in percent_df.columns])
+
+    #Set the axis labels and title
+    ax.set_xlabel(f'{by_col}')
+    ax.set_ylabel('Percentage')
+    ax.set_title(f'Stacked Bar Chart of {col} by {by_col}')
+
+    #Rotate the x-axis tick labels to be vertical
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+
+    #Show the legend
+    ax.legend()
+
+    #Display the chart
+    plt.show()
+
 
 def plot_violinplot(df: pd.DataFrame, cols: list[str], by_col: str) -> None:
     """
@@ -442,7 +458,7 @@ def plot_violinplot(df: pd.DataFrame, cols: list[str], by_col: str) -> None:
 
     for i, col in enumerate(cols):
         ax = axs[i]
-        sns.violinplot(x=by_col, y=col, data=df, ax=ax, palette= violin)
+        sns.violinplot(x=by_col, y=col, data=df, ax=ax, color='lightblue')
         ax.set_title(col.capitalize())
 
     plt.tight_layout()
@@ -903,25 +919,3 @@ def build_rules(df: pd.DataFrame, min_support: float, metric: str, min_threshold
     
     return rules
 
-
-
-#CONFIRMAR COMO É QUE ISTO FOI UTILIZADO COM A MADALENA E O BRUNO
-
-import itertools
-
-def create_scatterplots(data, continuous_vars, discrete_vars):
-    sns.set(style="ticks")
-    
-    num_continuous = len(continuous_vars)
-    num_discrete = len(discrete_vars)
-    fig, axes = plt.subplots(num_discrete, num_continuous, figsize=(12, 8), sharex='col', sharey='row')
-    axes = axes.flatten()
-    
-    for i, (continuous_var, discrete_var) in enumerate(itertools.product(continuous_vars, discrete_vars)):
-        ax = axes[i]
-        sns.scatterplot(x=continuous_var, y=discrete_var, data=data, ax=ax)
-        ax.set_xlabel(continuous_var)
-        ax.set_ylabel(discrete_var)
-    
-    plt.tight_layout()
-    plt.show()
