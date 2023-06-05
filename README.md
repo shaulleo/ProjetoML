@@ -1,7 +1,8 @@
 # ProjetoML
 Machine Learning II Final Project on Customer Segmentation
 
-    **GROUP MEMBERS**:
-    - Bruno Moreira | 20211574
-    - Carolina Braziel Shaul | 20211557
+ **Group Members**
+ <br>
+    - Bruno Moreira | 20211574 <br>
+    - Carolina Braziel Shaul | 20211557 <br>
     - Madalena Frango |  20211522
