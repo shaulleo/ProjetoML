@@ -33,43 +33,57 @@ import warnings
 import ast
 warnings.filterwarnings("ignore")
 
+colors_dict_g = {
+    0: '#C9E6FF',
+    1: '#B5CFE6',
+    2: '#A1B8CC',
+    3: '#8DA1B3',
+    4: '#798A99',
+    5: '#657380',
+    6: '#515C66',
+    7: '#3C454C',
+    8: '#323A40',
+    9: '#282E33',
+    10: '#1E2326'
+}
 
+colors_dict_c = {
+    0: "#fce46d" , 
+    1: "#ffb380", 
+    2: "#91e6c7",
+    3: "#90a0de",
+    4: "#e68aa5",
+    5: "#b07bdb",
+    6: "#b8b2b2"
+    }
 
 colors_dict = {
-    0: "#5D0000" , 
-    1: "#39E34B", 
-    2: "#3981E3",
-    3: "#FFC300",
-    4: "#E339A8",
-    5: "#5D00A7",
-    6: "#88FFFB",
-    7: "#FFC088",
-    8: "#E1AFAF"}
-colors_dict_2 = {
-    0: "#5D0000",
-    1: "#39E34B",
-    2: "#3981E3",
-    3: "#FFC300",
-    4: "#E339A8",
-    5: "#5D00A7",
-    6: "#88FFFB",
-    7: "#FFC088",
-    8: "#E1AFAF",
-    9: "#FFA500",
-    10: "#FF69B4",
-    11: "#00FF00",
-    12: "#0000FF",
-    13: "#FFFF00",
-    14: "#FF00FF",
-    15: "#00FFFF",
-    16: "#800000",
-    17: "#008000",
-    18: "#000080",
-    19: "#808000",
-    20: "#800080",
-    21: "#FF4500",
-    22: "#00CED1"
+    0: '#d60f00',
+    1: '#8c3bff',
+    2: '#02d100',
+    3: '#00adc6',
+    4: '#97ff00',
+    5: '#ff7ed1',
+    6: '#6b004f',
+    7: '#ffa62f',
+    8: '#572e00',
+    9: '#00564e',
+    10: '#0000dd',
+    11: '#00fecf',
+    12: '#a17269',
+    13: '#bcb6ff',
+    14: '#96b57a',
+    15: '#bf03b9',
+    16: '#645474',
+    17: '#790000',
+    18: '#0480d8',
+    19: '#fdf797',
+    20: '#004b00',
+    21: '#8e7900',
+    22: '#ff7266',
+    23: '#edb8b8'
 }
+
 violin = {
     0: "#5b9abd", 
     1: "#5b9abd",
@@ -347,7 +361,7 @@ def plot_histograms(df: pd.DataFrame, cols: list[str], hue_var: str = None) -> N
         ax = axs[i]
         #If there is a hue value:
         if hue_var is not None:
-            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors_dict)
+            sns.histplot(data=df, x=col, bins=bins, ax=ax, hue=hue_var, palette=colors_dict_c)
             ax.set_title(f'Histogram of {col} by {hue_var}', fontsize=14)
         else:
             sns.histplot(data=df, x=col, bins=bins, ax=ax, color='#5b9abd', linewidth=0.5, edgecolor=".2")
@@ -400,7 +414,7 @@ def plot_bar_charts(df: pd.DataFrame, cols: List[str], by_col = None, invert_axi
             else:
                 plot_data = df.groupby(column)[by_col].value_counts().unstack()
             #Plot the data
-            plot_data.plot(kind='bar', ax=ax, color=[colors_dict.get(x, '#6aa8cc') for x in plot_data.columns])
+            plot_data.plot(kind='bar', ax=ax, color=[colors_dict_g.get(x, '#6aa8cc') for x in plot_data.columns])
             ax.set_xlabel('')
             ax.set_title(column + ' by ' + by_col)
         #If there is no grouping
@@ -531,18 +545,18 @@ def pairplot(df: pd.DataFrame, cols: list[str], hue_var: str = None, sampling: i
     if data_type == 'continuous':
         #If using sampling or not
         if sampling == 0:
-            sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            sns.pairplot(df[cols], hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict_c)
             plt.show()
         else:
-            sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'scatter', diag_kind = 'hist', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict_c)
             plt.show()
     #If the features being used are discrete, plot the KDEplots on the pairplot.
     elif data_type == 'discrete':
         if sampling == 0:
-            sns.pairplot(df[cols], hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            sns.pairplot(df[cols], hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict_c)
             plt.show()
         else:
-            sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict)
+            sns.pairplot(df[cols].sample(sampling), hue = hue_var, kind = 'kde', diag_kind = 'kde', corner = True, plot_kws = dict(alpha = transparency), diag_kws=dict(fill=False), size = 3, palette = colors_dict_c)
             plt.show()
 
 
@@ -581,6 +595,7 @@ def boxplot_by(df: pd.DataFrame, cols: list[str], by_col: Union[str, None] = Non
     fig.tight_layout()
 
     plt.show()
+
 
 
 
@@ -678,7 +693,7 @@ def group_by_region(df: pd.DataFrame, region_col: str, cols: list[str]):
 
 # -------- K-MEANS
 
-def plot_inertia(df: pd.DataFrame, k: int, times: int) -> None:
+def plot_inertia(df: pd.DataFrame, k: int, times: int, optimum_k: int = None) -> None:
     """
     Plot the inertia of the K-Means algorithm for different values of k a given 
     number of times, to find the optimum number of k.
@@ -687,29 +702,35 @@ def plot_inertia(df: pd.DataFrame, k: int, times: int) -> None:
     df (pd.DataFrame): The dataframe containing the data aimed to be clustered.
     k (int): The maximum number of clusters to try.
     times (int): The number of times to run K-Means for each value of k.
+    optimum_k (int): The desired number of clusters to be marked (optional).
 
     Returns:
     None
     """
 
     fig, ax = plt.subplots()
-        #Generate a list of random states for the K-Means algorithm.
+    # Generate a list of random states for the K-Means algorithm.
     random_states = [np.random.randint(0, 1000) for i in range(times)]
-        #Iterate over the random states.
+    # Iterate over the random states.
     for i in random_states:
-        #Create an empty list to store the inertia values.
+        # Create an empty list to store the inertia values.
         inertia_kmeans = []
-        #Iterate over the number of clusters to try.
+        # Iterate over the number of clusters to try.
         for j in range(2, k):
-            #Run the K-Means algorithm and store the inertia value in 
-            # the designated list.
+            # Run the K-Means algorithm and store the inertia value in the designated list.
             kmeans = KMeans(n_clusters=j, random_state=i).fit(df)
             inertia_kmeans.append(kmeans.inertia_)
-        #Plot the inertia values for every random state.
+        # Plot the inertia values for every random state.
         ax.plot(range(2, k), inertia_kmeans, 'x-', label=f'i={i}')
-    
+
+    # Check if optimum_k is provided and plot the point if it is a valid cluster number
+    if optimum_k is not None and 2 <= optimum_k < k:
+        optimum_index = optimum_k - 2
+        ax.plot(optimum_k, inertia_kmeans[optimum_index], 'ro', markersize=10, label='Optimum')
+
     ax.legend()
     plt.show()
+
 
 
 
@@ -764,7 +785,7 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
 
     #Plot silhouette visualization
     fig, ax = plt.subplots()
-    fig.set_size_inches(7, 4)
+    fig.set_size_inches(10, 4)
 
     y_lower = 10
     for i in range(n_clusters):
@@ -779,7 +800,7 @@ def silhoette_method(df: pd.DataFrame, cluster_col: str) -> None:
 
         #Color the clusters
         #color = plt.cm.get_cmap("Spectral")(float(i) / n_clusters)
-        color = colors_dict[i]
+        color = colors_dict_c[i]
         ax.fill_betweenx(np.arange(y_lower, y_upper), 0, ith_cluster_silhouette_values,
                         facecolor=color, edgecolor=color, alpha=0.7)
 
@@ -831,11 +852,11 @@ def umap_plot(df: pd.DataFrame, cluster_col: str) -> None:
     #cmap = plt.cm.get_cmap('viridis', n_clusters)
     
     #plt.scatter(embedding[:, 0], embedding[:, 1], c=labels, cmap=cmap)
-    plt.scatter(embedding[:, 0], embedding[:, 1], c=[colors_dict[label] for label in labels])
+    plt.scatter(embedding[:, 0], embedding[:, 1], c=[colors_dict_c[label] for label in labels])
     plt.gca().set_aspect('equal', 'datalim')
     
     # Create a colormap using the colors from the dictionary
-    cmap = mcolors.ListedColormap([colors_dict[label] for label in range(n_clusters)])
+    cmap = mcolors.ListedColormap([colors_dict_c[label] for label in range(n_clusters)])
     norm = mcolors.BoundaryNorm(np.arange(n_clusters + 1) - 0.5, n_clusters)
 
     # Create a colorbar with the colors and labels from the dictionary
