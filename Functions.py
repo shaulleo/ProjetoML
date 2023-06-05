@@ -98,7 +98,6 @@ violin = {
 }
 
 
-#Functions
 
 # ---------- DATA PRE-PROCESSING
 
@@ -426,7 +425,7 @@ def plot_violinplot(df: pd.DataFrame, cols: list[str], by_col: str) -> None:
     Parameters:
     - df (pd.DataFrame): The pandas DataFrame with the data to plot.
     - cols (list[str]): A list of strings representing the names of the columns to plot.
-    - by_col (str): The column name that represents the y axis.
+    - by_col (str): The column name representing the variable to distinguish the Violin plots by.
 
     Returns:
     - None
